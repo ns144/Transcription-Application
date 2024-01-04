@@ -47,17 +47,14 @@ def get_file(filename):
 
 def transcribe(tasks):
     import whisper
-    import time
     model = whisper.load_model("base")
     files = tasks["transcripts"]
 
     for file in files:
         filename = str(file["filename"])
-        print("Transcription of:"+filename)
         if ".wav" in filename:
-            print("Transcription")
+            print("Transcription of:"+filename)
             get_file(filename)
-            time.sleep(1)
             print(os.path.exists(filename))
             result = model.transcribe(filename)
             print(result["text"])
