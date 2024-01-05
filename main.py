@@ -92,6 +92,23 @@ def transcribe(tasks):
             upload_file(srt_path)
             os.remove(srt_path)
 
+def transcribe_cpp(tasks):
+
+    from whispercpp import Whisper
+
+    model = Whisper('tiny')
+
+    files = tasks["transcripts"]
+
+    for file in files:
+        filename = str(file["filename"])
+        if ".wav" in filename:
+            print("Transcription of:"+filename)
+            get_file(filename)
+            print(os.path.exists(filename))
+            result = model.transcribe(filename)
+            print("Result:", str(model.extract_text(result)))
+
 tasks = get_tasks()
 if tasks != None:
-    transcribe(tasks)
+    transcribe_cpp(tasks)
