@@ -164,3 +164,4 @@ cython_debug/
 *.wav
 ffmpeg.exe
 ffprobe.exe
+*.srt
