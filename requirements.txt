@@ -1,4 +1,3 @@
 python-dotenv
 requests
 boto3
-whispercpp @ git+https://github.com/stlukey/whispercpp.py@7af678159c29edb3bc2a51a72665073d58f2352f

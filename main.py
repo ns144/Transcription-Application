@@ -62,7 +62,7 @@ def transcribe(tasks):
     import whisper
     from whisper.utils import get_writer
     from pathlib import Path
-    model = whisper.load_model("base")
+    model = whisper.load_model("tiny")
     files = tasks["transcripts"]
 
     for file in files:
@@ -111,4 +111,4 @@ def transcribe_cpp(tasks):
 
 tasks = get_tasks()
 if tasks != None:
-    transcribe_cpp(tasks)
+    transcribe(tasks)
