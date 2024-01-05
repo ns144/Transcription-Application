@@ -34,6 +34,8 @@ call .\env\Scripts\activate.bat
 python.exe -m pip install --upgrade pip
 pip cache purge
 
+pip install openai-whisper --no-cache-dir
+
 :: Install requirements
 pip install -r requirements.txt
 

@@ -90,7 +90,7 @@ def transcribe(tasks):
                 writer(result, srt_path)
             print("DONE writing SRT: " + str(srt_path))
             upload_file(srt_path)
-            #os.remove(srt_path)
+            os.remove(srt_path)
 
 tasks = get_tasks()
 if tasks != None:
