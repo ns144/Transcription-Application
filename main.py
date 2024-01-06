@@ -109,7 +109,7 @@ def write_txt(text, txt_path):
 def transcribe(tasks):
     import whisper
     from pathlib import Path
-    model = whisper.load_model("base")
+    model = whisper.load_model("tiny")
     files = tasks["transcripts"]
 
     for file in files:
