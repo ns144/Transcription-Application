@@ -1,17 +1,18 @@
 import os
-from dotenv import load_dotenv
 import boto3
 import requests
 import json
+from get_secret import get_secret
+
+secret = get_secret()
+#with open('env.json') as secret_file:
+#  secret = json.load(secret_file)
+
 def get_tasks():
 
-
-    # Load Environment Variable File
-    load_dotenv()
-
     # Get Api URL and Transcription Servive API Key
-    API_URL = os.getenv('API_URL')
-    TRANSCRIPTION_SERVICE_API_KEY = os.getenv('TRANSCRIPTION_SERVICE_API_KEY')
+    API_URL = secret["API_URL"]
+    TRANSCRIPTION_SERVICE_API_KEY = secret["TRANSCRIPTION_SERVICE_API_KEY"]
 
     print(str(API_URL)+" Key: "+str(TRANSCRIPTION_SERVICE_API_KEY))
 
@@ -38,29 +39,29 @@ def get_tasks():
 
 def get_s3_client():
     #load_dotenv()
-    SECRET_KEY =  os.getenv('SECRET_KEY')
-    ACCESS_KEY =  os.getenv('ACCESS_KEY')
+    SECRET_KEY =  secret["SECRET_KEY"]
+    ACCESS_KEY =  secret["ACCESS_KEY"]
     s3 = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
     return s3
 
 def get_file(filename):
     #load_dotenv()
-    BUCKET_NAME = os.getenv('BUCKET_NAME')
+    BUCKET_NAME = secret["BUCKET_NAME"]
 
     s3 = get_s3_client()
     s3.download_file(BUCKET_NAME, filename, filename)
 
 def upload_file(filename):
     s3 = get_s3_client()
-    BUCKET_NAME = os.getenv('BUCKET_NAME')
+    BUCKET_NAME = secret["BUCKET_NAME"]
     try:
         response = s3.upload_file(filename, BUCKET_NAME, str(filename))
     except Exception as error:
         print("An exception occurred:", error)
     
 def update_status(id, status, preview=None):
-    MODIFY_URL = os.getenv('MODIFY_URL') + id
-    TRANSCRIPTION_SERVICE_API_KEY = os.getenv('TRANSCRIPTION_SERVICE_API_KEY')
+    MODIFY_URL = secret["MODIFY_URL"] + id
+    TRANSCRIPTION_SERVICE_API_KEY = secret["TRANSCRIPTION_SERVICE_API_KEY"]
     params = {'key': TRANSCRIPTION_SERVICE_API_KEY}
     if preview == None:
         body = {'status': status}
