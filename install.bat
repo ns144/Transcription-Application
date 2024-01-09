@@ -36,8 +36,6 @@ pip cache purge
 
 :: Whisper
 pip install openai-whisper
-:: Spacy
-python -m spacy download en_core_web_sm
 :: Pyannote
 pip install -qq https://github.com/pyannote/pyannote-audio/archive/refs/heads/develop.zip
 :: Torch Install

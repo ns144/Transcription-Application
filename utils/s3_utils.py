@@ -9,11 +9,11 @@ def get_s3_client(secret):
 def get_file(filename, secret):
     BUCKET_NAME = secret["BUCKET_NAME"]
 
-    s3 = get_s3_client()
+    s3 = get_s3_client(secret)
     s3.download_file(BUCKET_NAME, filename, filename)
 
 def upload_file(filename, secret):
-    s3 = get_s3_client()
+    s3 = get_s3_client(secret)
     BUCKET_NAME = secret["BUCKET_NAME"]
     try:
         response = s3.upload_file(filename, BUCKET_NAME, str(filename))

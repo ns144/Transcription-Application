@@ -8,6 +8,11 @@ from utils.s3_utils import upload_file, get_file
 from utils.api_utils import update_status, get_tasks
 from transcription.transcription_utils import condense_speakers, transcribe_segments, get_text
 
+# Get Secret
+secret = get_secret()
+#with open('env.json') as secret_file:
+#    secret = json.load(secret_file)
+
 def transcribe(tasks):
     import whisper
     import torch
@@ -19,11 +24,6 @@ def transcribe(tasks):
     print("GPU: " + str(torch.cuda.is_available()))
     print("Torch version:" + str(torch.__version__))
 
-    # Get Secret
-    secret = get_secret()
-    #with open('env.json') as secret_file:
-    #  secret = json.load(secret_file)
-
     for file in files:
         filename = str(file["filename"])
         if ".wav" in filename or ".mp3" in filename:
@@ -33,7 +33,7 @@ def transcribe(tasks):
                 # Download file from S3
                 get_file(filename, secret)
                 # Run speaker diarization
-                speaker_segments = speaker_diarization(filename)
+                speaker_segments = speaker_diarization(filename, secret)
                 # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker 
                 speaker_segments = condense_speakers(speaker_segments)
                 # transcription of the condensed segments
@@ -63,13 +63,13 @@ def transcribe(tasks):
                 upload_file(txt_path, secret)
                 os.remove(srt_path)
                 os.remove(txt_path)
-                update_status(file["id"], "SUCCESS", secret, result["text"][0:500])
+                update_status(file["id"], "SUCCESS", secret, text[0:500])
 
             except Exception as error:
                 print("Transcription failed:", error)
                 update_status(file["id"],"FAILED", secret)
 
 
-tasks = get_tasks()
+tasks = get_tasks(secret)
 if tasks != None:
     transcribe(tasks)
