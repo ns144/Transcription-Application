@@ -2,10 +2,10 @@ from pyannote.audio import Pipeline
 from speaker_segment import speaker_segment
 import torch
 
-def speaker_diarization(sourcefile):
+def speaker_diarization(sourcefile, secret):
   
   # usage of pyannote pretrained model for speaker diarization
-  pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1", use_auth_token="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")
+  pipeline = Pipeline.from_pretrained("pyannote/speaker-diarization@2.1", use_auth_token=secret["HUG_TOKEN"])
   # check if CUDA capable GPU is available
   try:
       print("Attempting to use CUDA capable GPU")

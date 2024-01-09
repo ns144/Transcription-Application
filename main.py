@@ -1,16 +1,12 @@
 import os
-import boto3
 import requests
 import json
 from get_secret import get_secret
 from speaker_diarization import speaker_diarization
-from file_helpers import write_srt, write_txt
+from utils.file_utils import write_srt, write_txt
+from utils.s3_utils import upload_file, get_file
 
-secret = get_secret()
-#with open('env.json') as secret_file:
-#  secret = json.load(secret_file)
-
-def get_tasks():
+def get_tasks(secret):
 
     # Get Api URL and Transcription Servive API Key
     API_URL = secret["API_URL"]
@@ -39,29 +35,8 @@ def get_tasks():
         print("An exception occurred:", error)
         return None
 
-def get_s3_client():
-    #load_dotenv()
-    SECRET_KEY =  secret["SECRET_KEY"]
-    ACCESS_KEY =  secret["ACCESS_KEY"]
-    s3 = boto3.client('s3', aws_access_key_id=ACCESS_KEY, aws_secret_access_key=SECRET_KEY)
-    return s3
-
-def get_file(filename):
-    #load_dotenv()
-    BUCKET_NAME = secret["BUCKET_NAME"]
-
-    s3 = get_s3_client()
-    s3.download_file(BUCKET_NAME, filename, filename)
-
-def upload_file(filename):
-    s3 = get_s3_client()
-    BUCKET_NAME = secret["BUCKET_NAME"]
-    try:
-        response = s3.upload_file(filename, BUCKET_NAME, str(filename))
-    except Exception as error:
-        print("An exception occurred:", error)
     
-def update_status(id, status, preview=None):
+def update_status(id, status, secret, preview=None):
     MODIFY_URL = secret["MODIFY_URL"] + id
     TRANSCRIPTION_SERVICE_API_KEY = secret["TRANSCRIPTION_SERVICE_API_KEY"]
     params = {'key': TRANSCRIPTION_SERVICE_API_KEY}
@@ -101,13 +76,18 @@ def transcribe(tasks):
     print("GPU: " + str(torch.cuda.is_available()))
     print("Torch version:" + str(torch.__version__))
 
+    # Get Secret
+    secret = get_secret()
+    #with open('env.json') as secret_file:
+    #  secret = json.load(secret_file)
+
     for file in files:
         filename = str(file["filename"])
         if ".wav" in filename or ".mp3" in filename:
             try:
-                update_status(file["id"], "PROCESSING")
+                update_status(file["id"], "PROCESSING", secret)
                 print("Transcription of:"+filename)
-                get_file(filename)
+                get_file(filename, secret)
                 print(os.path.exists(filename))
                 result = model.transcribe(filename)
                 print(result["text"])
@@ -118,16 +98,16 @@ def transcribe(tasks):
                 txt_path = filepath.with_suffix('.txt')
 
                 write_srt(result, srt_path)
-                upload_file(srt_path)
+                upload_file(srt_path, secret)
                 write_txt(result["text"], txt_path)
-                upload_file(txt_path)
+                upload_file(txt_path, secret)
                 os.remove(srt_path)
                 os.remove(txt_path)
-                update_status(file["id"], "SUCCESS", result["text"][0:500])
+                update_status(file["id"], "SUCCESS", secret, result["text"][0:500])
 
             except Exception as error:
                 print("Transcription failed:", error)
-                update_status(file["id"],"FAILED")
+                update_status(file["id"],"FAILED", secret)
 
 
 tasks = get_tasks()
