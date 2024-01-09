@@ -2,10 +2,11 @@ import os
 import requests
 import json
 from get_secret import get_secret
-from speaker_diarization import speaker_diarization
+from transcription.speaker_diarization import speaker_diarization
 from utils.file_utils import write_srt, write_txt
 from utils.s3_utils import upload_file, get_file
 from utils.api_utils import update_status, get_tasks
+from transcription.transcription_utils import condenseSegments, condenseSpeakers
 
 def transcribe(tasks):
     import whisper
@@ -29,8 +30,13 @@ def transcribe(tasks):
             try:
                 update_status(file["id"], "PROCESSING", secret)
                 print("Transcription of:"+filename)
+                # Download file from S3
                 get_file(filename, secret)
-                print(os.path.exists(filename))
+                # Run speaker diarization
+                speaker_segments = speaker_diarization(filename)
+                # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker 
+                speaker_segments = condenseSpeakers(speaker_segments)
+
                 result = model.transcribe(filename)
                 print(result["text"])
                 os.remove(filename)
