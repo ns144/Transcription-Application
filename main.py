@@ -33,12 +33,16 @@ def transcribe(tasks):
                 # Download file from S3
                 get_file(filename, secret)
                 # Run speaker diarization
+                print("Speaker Diarization")
                 speaker_segments = speaker_diarization(filename, secret)
                 # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker 
+                print("Condense Speakers")
                 speaker_segments = condense_speakers(speaker_segments)
                 # transcription of the condensed segments
+                print("Transcribe Segments")
                 transcribed_segments = transcribe_segments(filename, speaker_segments)
 
+                print("Write Files")
                 # Raw text of transcription
                 text = get_text(transcribed_segments)
                 print(text)
