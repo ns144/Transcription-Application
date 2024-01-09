@@ -3,6 +3,8 @@ import boto3
 import requests
 import json
 from get_secret import get_secret
+from speaker_diarization import speaker_diarization
+from file_helpers import write_srt, write_txt
 
 secret = get_secret()
 #with open('env.json') as secret_file:
@@ -109,9 +111,14 @@ def write_txt(text, txt_path):
 
 def transcribe(tasks):
     import whisper
+    import torch
     from pathlib import Path
     model = whisper.load_model("tiny")
     files = tasks["transcripts"]
+
+    # Check Cuda availability
+    print("GPU: " + str(torch.cuda.is_available()))
+    print("Torch version:" + str(torch.__version__))
 
     for file in files:
         filename = str(file["filename"])
