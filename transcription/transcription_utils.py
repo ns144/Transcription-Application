@@ -1,7 +1,10 @@
 import re
-
+import subprocess
+import whisper
+import os
+from speaker_segment import transcribed_segment
 # condense transcribed words into full sentences
-def condenseSegments(segments:list, sentences:int=1, inprecise:bool=True):
+def condense_segments(segments:list, sentences:int=1, inprecise:bool=True):
     segments_count = len(segments)
     summarized_segments = []
     tmp_text = ""
@@ -47,7 +50,7 @@ def condenseSegments(segments:list, sentences:int=1, inprecise:bool=True):
     return summarized_segments
 
 # speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker 
-def condenseSpeakers(speaker_segments):
+def condense_speakers(speaker_segments):
     condensedSpeakers = []
 
     latest_timestamp = 0
@@ -78,3 +81,37 @@ def condenseSpeakers(speaker_segments):
 
 
     return condensedSpeakers
+
+
+def transcribe_segments(filename, speaker_segments):
+    model = whisper.load_model("base")
+    
+    transcribed_segments = []
+
+    for segment in speaker_segments:
+        # render a wav for the current segment for the transcription
+        segmentName = "segment_" + str(segment.in_point) + ".wav"
+        subprocess.call(['ffmpeg', '-i', filename, '-ss', str(segment.in_point), '-to', str(segment.out_point), segmentName, '-y'])
+       
+        # transcription using OpenAI Whisper
+        result = model.transcribe(segmentName)
+        summarized_segments = condense_segments(result['segments'], 1)
+
+        timecode_corrected_segments = []
+
+        for s in summarized_segments:
+            timecode_corrected_segments.append({'id':s['id'],'start':segment.in_point + s['start'], 'end': segment.in_point+s['end'], 'text': s['text']})
+
+        transcribed_segments.append(transcribed_segment(segment.speaker, timecode_corrected_segments))
+        os.remove(segmentName)
+
+    return transcribed_segments
+
+def get_text(transcribed_segments):
+    text = ""
+    for segment in transcribed_segments:
+        text += segment.speaker +": "
+        for s in segment.segments:
+            text += s["text"]
+        text += " \n"
+    return text

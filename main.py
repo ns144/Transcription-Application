@@ -6,7 +6,7 @@ from transcription.speaker_diarization import speaker_diarization
 from utils.file_utils import write_srt, write_txt
 from utils.s3_utils import upload_file, get_file
 from utils.api_utils import update_status, get_tasks
-from transcription.transcription_utils import condenseSegments, condenseSpeakers
+from transcription.transcription_utils import condense_speakers, transcribe_segments, get_text
 
 def transcribe(tasks):
     import whisper
@@ -35,19 +35,31 @@ def transcribe(tasks):
                 # Run speaker diarization
                 speaker_segments = speaker_diarization(filename)
                 # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker 
-                speaker_segments = condenseSpeakers(speaker_segments)
+                speaker_segments = condense_speakers(speaker_segments)
+                # transcription of the condensed segments
+                transcribed_segments = transcribe_segments(filename, speaker_segments)
 
-                result = model.transcribe(filename)
-                print(result["text"])
+                # Raw text of transcription
+                text = get_text(transcribed_segments)
+                print(text)
                 os.remove(filename)
 
+                # Generation of srt compatible dict
+                srt_segments = []
+                for segment in transcribed_segments:
+                    for s in segment.segments:
+                        srt_segments.append(s)
+                segments_as_dict = dict()
+                segments_as_dict["segments"] = srt_segments
+
+                # File paths for srt, txt and docx
                 filepath = Path(filename)
                 srt_path = filepath.with_suffix('.srt')
                 txt_path = filepath.with_suffix('.txt')
 
-                write_srt(result, srt_path)
+                write_srt(segments_as_dict, srt_path)
                 upload_file(srt_path, secret)
-                write_txt(result["text"], txt_path)
+                write_txt(text, txt_path)
                 upload_file(txt_path, secret)
                 os.remove(srt_path)
                 os.remove(txt_path)
