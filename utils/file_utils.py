@@ -13,9 +13,13 @@ def write_srt(result, srt_path):
     print("DONE writing SRT: " + str(srt_path))
 
 def write_txt(text, txt_path):
-    with open(txt_path, 'w') as f:
-        f.write(text)
-    print("DONE writing TXT: " + str(txt_path))
+    try:
+        with open(txt_path, 'w', encoding='utf-8') as f:
+            f.write(text)
+        print("DONE writing TXT: " + str(txt_path))
+    except Exception as error:
+        print("Writing TXT failed:" + str(error))
+
 
 def write_docx(speaker_segments:list,translated_segments:list,scriptFilename:str, sourcefile="", translated=False):
     from docx import Document

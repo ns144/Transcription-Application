@@ -35,7 +35,7 @@ def transcribe(tasks):
                 get_file(filename, secret)
 
                 # Normalization of Audio
-                subprocess.call(['ffmpeg', '-i', filename,"-filter:a", "loudnorm=I=-20:LRA=4","-ac", "1","-ar","48000", 'audio.wav', '-y'])
+                subprocess.call(['ffmpeg', '-i', filename,"-filter:a", "loudnorm=I=-20:LRA=4","-ac", "1","-ar","48000", 'audio.wav', '-y', '-loglevel', "quiet"])
                 normed_audio = 'audio.wav'
                 # Run speaker diarization
                 print("Speaker Diarization")

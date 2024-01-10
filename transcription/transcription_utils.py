@@ -91,7 +91,7 @@ def transcribe_segments(filename, speaker_segments):
     for segment in speaker_segments:
         # render a wav for the current segment for the transcription
         segmentName = "segment_" + str(segment.in_point) + ".wav"
-        subprocess.call(['ffmpeg', '-i', filename, '-ss', str(segment.in_point), '-to', str(segment.out_point), segmentName, '-y'])
+        subprocess.call(['ffmpeg', '-i', filename, '-ss', str(segment.in_point), '-to', str(segment.out_point), segmentName, '-y','-loglevel', "quiet"])
        
         # transcription using OpenAI Whisper
         result = model.transcribe(segmentName)
