@@ -26,7 +26,7 @@ def transcribe(tasks):
     print("Torch version:" + str(torch.__version__))
 
     for file in files:
-        filename = str(file["filename"])
+        filename = str(file["fileNameWithExt"])
         try:
             update_status(file["id"], "PROCESSING", secret)
             print("Transcription of:"+filename)
