@@ -11,7 +11,7 @@ def get_tasks(secret):
 
     # Call API
     # Set up the parameters for the API request
-    params = {'key': TRANSCRIPTION_SERVICE_API_KEY}
+    params = {'key': TRANSCRIPTION_SERVICE_API_KEY, 'filter': 'PENDING'}
     # Make the API request
     try:
         response = requests.get(API_URL, params=params)
