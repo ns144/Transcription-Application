@@ -27,60 +27,53 @@ def transcribe(tasks):
 
     for file in files:
         filename = str(file["filename"])
-        if ".wav" in filename or ".mp3" in filename:
-            try:
-                update_status(file["id"], "PROCESSING", secret)
-                print("Transcription of:"+filename)
-                # Download file from S3
-                get_file(filename, secret)
-
-                # Normalization of Audio
-                subprocess.call(['ffmpeg', '-i', filename,"-filter:a", "loudnorm=I=-20:LRA=4","-ac", "1","-ar","48000", 'audio.wav', '-y', '-loglevel', "quiet"])
-                normed_audio = 'audio.wav'
-                # Run speaker diarization
-                print("Speaker Diarization")
-                speaker_segments = speaker_diarization(normed_audio, secret)
-                # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker 
-                print("Condense Speakers")
-                speaker_segments = condense_speakers(speaker_segments)
-                # transcription of the condensed segments
-                print("Transcribe Segments")
-                transcribed_segments = transcribe_segments(normed_audio, speaker_segments)
-
-                print("Write Files")
-                # Raw text of transcription
-                text = get_text(transcribed_segments)
-                print(text)
-                os.remove(filename)
-
-                # Generation of srt compatible dict
-                srt_segments = []
-                for segment in transcribed_segments:
-                    for s in segment.segments:
-                        srt_segments.append(s)
-                segments_as_dict = dict()
-                segments_as_dict["segments"] = srt_segments
-
-                # File paths for srt, txt and docx
-                filepath = Path(filename)
-                srt_path = filepath.with_suffix('.srt')
-                txt_path = filepath.with_suffix('.txt')
-                docx_path = filepath.with_suffix('.docx')
-
-                write_srt(segments_as_dict, srt_path)
-                upload_file(srt_path, secret)
-                write_txt(text, txt_path)
-                upload_file(txt_path, secret)
-                write_docx(speaker_segments=transcribed_segments, translated_segments=transcribed_segments, scriptFilename=docx_path, sourcefile=filename, translated=False)
-                upload_file(docx_path, secret)
-                os.remove(srt_path)
-                os.remove(txt_path)
-                os.remove(docx_path)
-                update_status(file["id"], "SUCCESS", secret, text[0:500])
-
-            except Exception as error:
-                print("Transcription failed:", error)
-                update_status(file["id"],"FAILED", secret)
+        try:
+            update_status(file["id"], "PROCESSING", secret)
+            print("Transcription of:"+filename)
+            # Download file from S3
+            get_file(filename, secret)
+            # Normalization of Audio
+            subprocess.call(['ffmpeg', '-i', filename,"-filter:a", "loudnorm=I=-20:LRA=4","-ac", "1","-ar","48000", 'audio.wav', '-y', '-loglevel', "quiet"])
+            normed_audio = 'audio.wav'
+            # Run speaker diarization
+            print("Speaker Diarization")
+            speaker_segments = speaker_diarization(normed_audio, secret)
+            # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker 
+            print("Condense Speakers")
+            speaker_segments = condense_speakers(speaker_segments)
+            # transcription of the condensed segments
+            print("Transcribe Segments")
+            transcribed_segments = transcribe_segments(normed_audio, speaker_segments)
+            print("Write Files")
+            # Raw text of transcription
+            text = get_text(transcribed_segments)
+            print(text)
+            os.remove(filename)
+            # Generation of srt compatible dict
+            srt_segments = []
+            for segment in transcribed_segments:
+                for s in segment.segments:
+                    srt_segments.append(s)
+            segments_as_dict = dict()
+            segments_as_dict["segments"] = srt_segments
+            # File paths for srt, txt and docx
+            filepath = Path(filename)
+            srt_path = filepath.with_suffix('.srt')
+            txt_path = filepath.with_suffix('.txt')
+            docx_path = filepath.with_suffix('.docx')
+            write_srt(segments_as_dict, srt_path)
+            upload_file(srt_path, secret)
+            write_txt(text, txt_path)
+            upload_file(txt_path, secret)
+            write_docx(speaker_segments=transcribed_segments, translated_segments=transcribed_segments, scriptFilename=docx_path, sourcefile=filename, translated=False)
+            upload_file(docx_path, secret)
+            os.remove(srt_path)
+            os.remove(txt_path)
+            os.remove(docx_path)
+            update_status(file["id"], "SUCCESS", secret, text[0:500])
+        except Exception as error:
+            print("Transcription failed:", error)
+            update_status(file["id"],"FAILED", secret)
 
 
 tasks = get_tasks(secret)
