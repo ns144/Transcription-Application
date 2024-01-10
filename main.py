@@ -1,9 +1,10 @@
 import os
+import subprocess
 import requests
 import json
 from get_secret import get_secret
 from transcription.speaker_diarization import speaker_diarization
-from utils.file_utils import write_srt, write_txt
+from utils.file_utils import write_srt, write_txt, write_docx
 from utils.s3_utils import upload_file, get_file
 from utils.api_utils import update_status, get_tasks
 from transcription.transcription_utils import condense_speakers, transcribe_segments, get_text
@@ -32,15 +33,19 @@ def transcribe(tasks):
                 print("Transcription of:"+filename)
                 # Download file from S3
                 get_file(filename, secret)
+
+                # Normalization of Audio
+                subprocess.call(['ffmpeg', '-i', filename,"-filter:a", "loudnorm=I=-20:LRA=4","-ac", "1","-ar","48000", 'audio.wav', '-y'])
+                normed_audio = 'audio.wav'
                 # Run speaker diarization
                 print("Speaker Diarization")
-                speaker_segments = speaker_diarization(filename, secret)
+                speaker_segments = speaker_diarization(normed_audio, secret)
                 # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker 
                 print("Condense Speakers")
                 speaker_segments = condense_speakers(speaker_segments)
                 # transcription of the condensed segments
                 print("Transcribe Segments")
-                transcribed_segments = transcribe_segments(filename, speaker_segments)
+                transcribed_segments = transcribe_segments(normed_audio, speaker_segments)
 
                 print("Write Files")
                 # Raw text of transcription
@@ -60,13 +65,17 @@ def transcribe(tasks):
                 filepath = Path(filename)
                 srt_path = filepath.with_suffix('.srt')
                 txt_path = filepath.with_suffix('.txt')
+                docx_path = filepath.with_suffix('.docx')
 
                 write_srt(segments_as_dict, srt_path)
                 upload_file(srt_path, secret)
                 write_txt(text, txt_path)
                 upload_file(txt_path, secret)
+                write_docx(speaker_segments=transcribed_segments, translated_segments=transcribed_segments, scriptFilename=docx_path, sourcefile=filename, translated=False)
+                upload_file(docx_path, secret)
                 os.remove(srt_path)
                 os.remove(txt_path)
+                os.remove(docx_path)
                 update_status(file["id"], "SUCCESS", secret, text[0:500])
 
             except Exception as error:

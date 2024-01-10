@@ -37,7 +37,7 @@ pip cache purge
 :: Whisper
 pip install openai-whisper
 :: Pyannote
-pip install -qq https://github.com/pyannote/pyannote-audio/archive/refs/heads/develop.zip
+pip install pyannote.audio
 :: Torch Install
 pip install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
 :: Install requirements
