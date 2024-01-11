@@ -47,7 +47,7 @@ def transcribe(tasks):
             print("Write Files")
             # Raw text of transcription
             text = get_text(transcribed_segments)
-            print(text)
+            print(text[0:100])
             os.remove(filename)
             # Generation of srt compatible dict
             srt_segments = []
