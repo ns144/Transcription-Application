@@ -14,6 +14,14 @@ secret = get_secret()
 #with open('env.json') as secret_file:
 #   secret = json.load(secret_file)
 
+def refresh_tasks():
+    tasks = get_tasks(secret)
+    if tasks != None and tasks['transcripts'] != []:
+        transcribe(tasks)
+    else:
+        print("No more Tasks in Queue - Shutting Down")
+
+
 def transcribe(tasks):
     import torch
     from pathlib import Path
@@ -79,10 +87,3 @@ def transcribe(tasks):
 tasks = get_tasks(secret)
 if tasks != None:
     transcribe(tasks)
-
-def refresh_tasks():
-    tasks = get_tasks(secret)
-    if tasks != None:
-        transcribe(tasks)
-    else:
-        print("No more Tasks in Queue - Shutting Down")
