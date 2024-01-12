@@ -3,6 +3,7 @@ from speaker_segment import speaker_segment
 import subprocess
 import torch
 from pyannote.audio.pipelines.utils.hook import ProgressHook
+import torchaudio
 
 def speaker_diarization(sourcefile, secret):
   # usage of pyannote pretrained model for speaker diarization
@@ -15,10 +16,13 @@ def speaker_diarization(sourcefile, secret):
       print("Using CPU instead")
       pipeline.to(torch.device("cpu"))
       
+  # Load audio in memory
+  waveform, sample_rate = torchaudio.load(sourcefile)
+  audio_in_memory = {"waveform": waveform, "sample_rate": sample_rate}
   # sourcefile = 'audio.wav'
   # apply the pipeline to an audio file
   with ProgressHook() as hook:
-    diarization = pipeline(sourcefile, min_speakers=2, max_speakers=8, hook=hook)
+    diarization = pipeline(audio_in_memory, min_speakers=2, max_speakers=8, hook=hook)
 
   speaker_segments = []
   

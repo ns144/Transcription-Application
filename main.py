@@ -12,7 +12,7 @@ from transcription.transcription_utils import condense_speakers, transcribe_segm
 # Get Secret
 secret = get_secret()
 #with open('env.json') as secret_file:
-#    secret = json.load(secret_file)
+#   secret = json.load(secret_file)
 
 def transcribe(tasks):
     import whisper
@@ -33,6 +33,7 @@ def transcribe(tasks):
             # Download file from S3
             get_file(filename, secret)
             # Normalization of Audio
+            print("Convert File to Wav")
             subprocess.call(['ffmpeg', '-i', filename,"-filter:a", "loudnorm=I=-20:LRA=4","-ac", "1","-ar","48000", 'audio.wav', '-y', '-loglevel', "quiet"])
             normed_audio = 'audio.wav'
             # Run speaker diarization

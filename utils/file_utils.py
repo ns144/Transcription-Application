@@ -119,3 +119,4 @@ def write_docx(speaker_segments:list,translated_segments:list,scriptFilename:str
     run.italic = True   
 
     document.save(scriptFilename)
+    print("DONE writing DOCX: " + str(scriptFilename))
