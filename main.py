@@ -15,10 +15,8 @@ secret = get_secret()
 #   secret = json.load(secret_file)
 
 def transcribe(tasks):
-    import whisper
     import torch
     from pathlib import Path
-    model = whisper.load_model("tiny")
     files = tasks["transcripts"]
 
     # Check Cuda availability
@@ -75,8 +73,16 @@ def transcribe(tasks):
         except Exception as error:
             print("Transcription failed:", error)
             update_status(file["id"],"FAILED", secret)
-
+    
+    refresh_tasks()
 
 tasks = get_tasks(secret)
 if tasks != None:
     transcribe(tasks)
+
+def refresh_tasks():
+    tasks = get_tasks(secret)
+    if tasks != None:
+        transcribe(tasks)
+    else:
+        print("No more Tasks in Queue - Shutting Down")
