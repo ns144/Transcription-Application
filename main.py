@@ -72,7 +72,7 @@ def transcribe(tasks):
             upload_file(srt_path, secret)
             write_txt(text, txt_path)
             upload_file(txt_path, secret)
-            write_docx(speaker_segments=transcribed_segments, translated_segments=transcribed_segments, scriptFilename=docx_path, sourcefile=filename, translated=False)
+            write_docx(speaker_segments=transcribed_segments, translated_segments=transcribed_segments, scriptFilename=docx_path, sourcefile=file['displayFilename'], translated=False)
             upload_file(docx_path, secret)
             os.remove(srt_path)
             os.remove(txt_path)

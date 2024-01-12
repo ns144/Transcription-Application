@@ -20,6 +20,30 @@ def write_txt(text, txt_path):
     except Exception as error:
         print("Writing TXT failed:" + str(error))
 
+def add_hyperlink(paragraph, url, text):
+    import docx
+    # This gets access to the document.xml.rels file and gets a new relation id value
+    part = paragraph.part
+    r_id = part.relate_to(url, docx.opc.constants.RELATIONSHIP_TYPE.HYPERLINK, is_external=True)
+
+    # Create the w:hyperlink tag and add needed values
+    hyperlink = docx.oxml.shared.OxmlElement('w:hyperlink')
+    hyperlink.set(docx.oxml.shared.qn('r:id'), r_id, )
+
+    # Create a w:r element
+    new_run = docx.oxml.shared.OxmlElement('w:r')
+
+    # Create a new w:rPr element
+    rPr = docx.oxml.shared.OxmlElement('w:rPr')
+
+    # Join all the xml elements together add add the required text to the w:r element
+    new_run.append(rPr)
+    new_run.text = text
+    hyperlink.append(new_run)
+
+    paragraph._p.append(hyperlink)
+
+    return hyperlink
 
 def write_docx(speaker_segments:list,translated_segments:list,scriptFilename:str, sourcefile="", translated=False):
     from docx import Document
@@ -27,20 +51,38 @@ def write_docx(speaker_segments:list,translated_segments:list,scriptFilename:str
     from docx.enum.text import WD_ALIGN_PARAGRAPH
     from whisper.utils import format_timestamp
     from pathlib import Path
+    from docx.shared import RGBColor
 
     # DIN A4 page setup
-    document = Document()
+    document = Document('utils/TonTexterBase.docx')
     document.sections[0].page_width = Mm(210)
     document.sections[0].page_height = Mm(297)
 
+    # Setup Styles
+    style = document.styles['Normal']
+    font = style.font
+    font.name = 'Calibri'
+
+    title = document.styles['Title']
+    font = title.font
+    font.name = 'Calibri'
+    font.color.rgb = RGBColor(0x30, 0x30, 0x30)
+
+    title2 = document.styles['Heading 2']
+    font = title2.font
+    font.name = 'Calibri'
+    font.color.rgb = RGBColor(0x30, 0x30, 0x30)
+
     # Document header
-    document.add_heading('Transcription', 0)
-    p = document.add_paragraph('File:  ' + Path(sourcefile).name)
+    heading = document.add_heading('Transkription', 0)
+    # File Name
+    p = document.add_paragraph('Datei:  ' + Path(sourcefile).name)
+    p.style = document.styles['Normal']
 
-    document.add_heading('Ton-Texter', 2)
-    document.add_paragraph('Dieses Transkript wurde mit Ton-Texter generiert. Revolutionäre deinen Video-Editing Workflow mit Text-Based Editing powered by Ton-Texter. Zu Ton-Texter: https://ton-texter.de/')
+    document.add_heading('Revolutioniere deinen Workflow!', 2)
+    p = document.add_paragraph('Dieses Transkript wurde mit Ton-Texter generiert. Revolutioniere deinen Video-Editing Workflow mit Text-Based Editing powered by: ')
+    add_hyperlink(p,'https://ton-texter.de','Ton-Texter')
 
-    latest_timestamp = 0
     latest_index = 0
 
     # initialize table
@@ -115,7 +157,7 @@ def write_docx(speaker_segments:list,translated_segments:list,scriptFilename:str
         
 
     paragraph = document.add_paragraph()
-    run = paragraph.add_run('This transcript was generated automatically by Ton-Texter and needs further correction. Please ensure to have a translator check the content against the original audio.')
+    run = paragraph.add_run('Dieses Transkript wurde automatisch durch Ton-Texter generiert und benötigt dementsprechende Überarbeitung. Stellen Sie sicher, dass die Inhalte mit der originalen Audiospur abgeglichen werden.')
     run.italic = True   
 
     document.save(scriptFilename)
