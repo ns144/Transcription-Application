@@ -108,6 +108,69 @@ def transcribe_segments(filename, speaker_segments):
 
     return transcribed_segments
 
+def transcribe_segments_pydup(filename, speaker_segments):
+    from pydub import AudioSegment
+    import numpy as np
+    import tqdm
+    model = whisper.load_model("small")
+    transcribed_segments = []
+
+    # load audio 
+    audio = AudioSegment.from_file(filename,format="wav")
+    ## convert to expected format
+    if audio.frame_rate != 16000: # 16 kHz
+        audio = audio.set_frame_rate(16000)
+    if audio.sample_width != 2:   # int16
+        audio = audio.set_sample_width(2)
+    if audio.channels != 1:       # mono
+        audio = audio.set_channels(1)        
+    #audio = np.array(audio.get_array_of_samples())
+    #audio = audio.astype(np.float32)/32768.0
+
+    total = speaker_segments[-1].out_point
+    percent = total/100
+    prog = 0
+    for segment in speaker_segments:
+        with tqdm.tqdm(total=total) as progress:
+            #print("TRANSCRIPTION OF SEGMENT:", str(segment.in_point))
+            # Slice Audio with pydup
+            segment_in = int(segment.in_point*1000)
+            segment_out = int(segment.out_point*1000)
+            segmentAudio = audio[segment_in:segment_out]
+
+            ## convert to expected format
+            #if segmentAudio.frame_rate != 16000: # 16 kHz
+            #    segmentAudio = segmentAudio.set_frame_rate(16000)
+            #if segmentAudio.sample_width != 2:   # int16
+            #    segmentAudio = segmentAudio.set_sample_width(2)
+            #if segmentAudio.channels != 1:       # mono
+            #    segmentAudio = segmentAudio.set_channels(1)        
+            #arr = np.array(segmentAudio.get_array_of_samples())
+            #arr = arr.astype(np.float32)/32768.0
+
+            # transcription using OpenAI Whisper
+            result = model.transcribe(np.frombuffer(segmentAudio.raw_data, np.int16).flatten().astype(np.float32) / 32768.0)
+            summarized_segments = condense_segments(result['segments'], 1)
+
+            timecode_corrected_segments = []
+
+            for s in summarized_segments:
+                timecode_corrected_segments.append({'id':s['id'],'start':segment.in_point + s['start'], 'end': segment.in_point+s['end'], 'text': s['text']})
+
+            transcribed_segments.append(transcribed_segment(segment.speaker, timecode_corrected_segments))
+            
+            current = segment.out_point
+            if current > percent:
+                prog = current
+                progress.update(current)
+            elif current == total:
+                prog = current
+                progress.update(current)
+            else: 
+                progress.update(prog)
+
+    return transcribed_segments
+
 def get_text(transcribed_segments):
     text = ""
     for segment in transcribed_segments:
@@ -116,3 +179,4 @@ def get_text(transcribed_segments):
             text += s["text"]
         text += " \n"
     return text
+
