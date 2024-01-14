@@ -7,7 +7,7 @@ from transcription.speaker_diarization import speaker_diarization
 from utils.file_utils import write_srt, write_txt, write_docx
 from utils.s3_utils import upload_file, get_file
 from utils.api_utils import update_status, get_tasks
-from transcription.transcription_utils import condense_speakers, transcribe_segments, transcribe_segments_pydup, get_text
+from transcription.transcription_utils import condense_speakers, transcribe_segments, transcribe_segments_no_print, transcribe_segments_pydup, get_text
 
 import time
 
@@ -53,6 +53,12 @@ def transcribe(tasks):
             # transcription of the condensed segments
             print("Transcribe Segments")
 
+            # Transcription with FFMPEG
+            #start = time.time()
+            #transcribed_segments = transcribe_segments_no_print(normed_audio, speaker_segments)
+            #end = time.time()
+            #elapsed = end-start
+            #print("Transcription with FFMPEG took:", elapsed, "Seconds")
             # Transcription with FFMPEG
             #start = time.time()
             #transcribed_segments = transcribe_segments(normed_audio, speaker_segments)

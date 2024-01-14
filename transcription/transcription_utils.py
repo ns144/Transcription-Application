@@ -14,8 +14,8 @@ def condense_segments(segments:list, sentences:int=1, inprecise:bool=True):
     
     for index, segment in enumerate(segments):
         
-        last_line = index >= segments_count
-        
+        last_line = index >= segments_count-1
+        #print("Segments count: ", segments_count, " Current Index: ", index)
         #when start save start of segment
         if(new_start):    
             starttime = segment['start']
@@ -34,6 +34,7 @@ def condense_segments(segments:list, sentences:int=1, inprecise:bool=True):
         
         #if sentence completed or end of text reached
         if (score >= sentences or last_line):
+            #print("Last Line!")
             #note end time
             endtime = segment['end']
             
@@ -45,7 +46,8 @@ def condense_segments(segments:list, sentences:int=1, inprecise:bool=True):
             #reset
             score = 0
             new_start = True
-            tmp_text = ""      
+            tmp_text = ""    
+    
             
     return summarized_segments
 
@@ -84,13 +86,37 @@ def condense_speakers(speaker_segments):
 
 
 def transcribe_segments(filename, speaker_segments):
-    model = whisper.load_model("base")
+    model = whisper.load_model("small")
     
     transcribed_segments = []
 
     for segment in speaker_segments:
         # render a wav for the current segment for the transcription
         print("TRANSCRIPTION OF SEGMENT:", str(segment.in_point))
+        segmentName = "segment_" + str(segment.in_point) + ".wav"
+        subprocess.call(['ffmpeg', '-i', filename, '-ss', str(segment.in_point), '-to', str(segment.out_point), segmentName, '-y','-loglevel', "quiet"])
+       
+        # transcription using OpenAI Whisper
+        result = model.transcribe(segmentName)
+        summarized_segments = condense_segments(result['segments'], 1)
+        timecode_corrected_segments = []
+
+        for s in summarized_segments:
+            timecode_corrected_segments.append({'id':s['id'],'start':segment.in_point + s['start'], 'end': segment.in_point+s['end'], 'text': s['text']})
+
+        transcribed_segments.append(transcribed_segment(segment.speaker, timecode_corrected_segments))
+        os.remove(segmentName)
+
+    return transcribed_segments
+
+def transcribe_segments_no_print(filename, speaker_segments):
+    model = whisper.load_model("small")
+    
+    transcribed_segments = []
+
+    for segment in speaker_segments:
+        # render a wav for the current segment for the transcription
+        #print("TRANSCRIPTION OF SEGMENT:", str(segment.in_point))
         segmentName = "segment_" + str(segment.in_point) + ".wav"
         subprocess.call(['ffmpeg', '-i', filename, '-ss', str(segment.in_point), '-to', str(segment.out_point), segmentName, '-y','-loglevel', "quiet"])
        
@@ -124,29 +150,15 @@ def transcribe_segments_pydup(filename, speaker_segments):
         audio = audio.set_sample_width(2)
     if audio.channels != 1:       # mono
         audio = audio.set_channels(1)        
-    #audio = np.array(audio.get_array_of_samples())
-    #audio = audio.astype(np.float32)/32768.0
 
     total = speaker_segments[-1].out_point
-    percent = total/100
-    prog = 0
+
     for segment in speaker_segments:
         with tqdm.tqdm(total=total) as progress:
-            #print("TRANSCRIPTION OF SEGMENT:", str(segment.in_point))
             # Slice Audio with pydup
             segment_in = int(segment.in_point*1000)
             segment_out = int(segment.out_point*1000)
             segmentAudio = audio[segment_in:segment_out]
-
-            ## convert to expected format
-            #if segmentAudio.frame_rate != 16000: # 16 kHz
-            #    segmentAudio = segmentAudio.set_frame_rate(16000)
-            #if segmentAudio.sample_width != 2:   # int16
-            #    segmentAudio = segmentAudio.set_sample_width(2)
-            #if segmentAudio.channels != 1:       # mono
-            #    segmentAudio = segmentAudio.set_channels(1)        
-            #arr = np.array(segmentAudio.get_array_of_samples())
-            #arr = arr.astype(np.float32)/32768.0
 
             # transcription using OpenAI Whisper
             result = model.transcribe(np.frombuffer(segmentAudio.raw_data, np.int16).flatten().astype(np.float32) / 32768.0)
@@ -159,15 +171,7 @@ def transcribe_segments_pydup(filename, speaker_segments):
 
             transcribed_segments.append(transcribed_segment(segment.speaker, timecode_corrected_segments))
             
-            current = segment.out_point
-            if current > percent:
-                prog = current
-                progress.update(current)
-            elif current == total:
-                prog = current
-                progress.update(current)
-            else: 
-                progress.update(prog)
+            progress.update(segment.out_point)
 
     return transcribed_segments
 
