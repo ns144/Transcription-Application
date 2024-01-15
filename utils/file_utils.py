@@ -61,16 +61,16 @@ def write_docx(speaker_segments:list,translated_segments:list,scriptFilename:str
     # Setup Styles
     style = document.styles['Normal']
     font = style.font
-    font.name = 'Calibri'
+    font.name = 'Segoe UI'
 
     title = document.styles['Title']
     font = title.font
-    font.name = 'Calibri'
+    font.name = 'Segoe UI'
     font.color.rgb = RGBColor(0x30, 0x30, 0x30)
 
     title2 = document.styles['Heading 2']
     font = title2.font
-    font.name = 'Calibri'
+    font.name = 'Segoe UI'
     font.color.rgb = RGBColor(0x30, 0x30, 0x30)
 
     # Document header
