@@ -74,12 +74,6 @@ def transcribe(task):
             end = time.time()
             elapsed = end-start
             print("Transcription with Faster Whisper Small took:", elapsed, "Seconds")
-            
-            start = time.time()
-            transcribed_segments = transcribe_segments_faster_whisper(normed_audio, speaker_segments, "large-v3")
-            end = time.time()
-            elapsed = end-start
-            print("Transcription with Faster Whisper Large took:", elapsed, "Seconds")
         except Exception as error:
             print("Faster Whisper failed: ", error)
             # Transcription with Pydup
