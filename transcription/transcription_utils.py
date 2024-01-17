@@ -175,6 +175,53 @@ def transcribe_segments_pydup(filename, speaker_segments):
 
     return transcribed_segments
 
+def transcribe_segments_faster_whisper(filename, speaker_segments):
+    from pydub import AudioSegment
+    import numpy as np
+    import tqdm
+    from faster_whisper import WhisperModel
+
+    #model_size = "large-v3"
+    model_size = "small"
+    # Run on GPU with FP16
+    model = WhisperModel(model_size, device="cuda", compute_type="float16")
+    transcribed_segments = []
+
+    # load audio 
+    audio = AudioSegment.from_file(filename,format="wav")
+    ## convert to expected format
+    if audio.frame_rate != 16000: # 16 kHz
+        audio = audio.set_frame_rate(16000)
+    if audio.sample_width != 2:   # int16
+        audio = audio.set_sample_width(2)
+    if audio.channels != 1:       # mono
+        audio = audio.set_channels(1)        
+
+    total = speaker_segments[-1].out_point
+
+    for segment in speaker_segments:
+        with tqdm.tqdm(total=total) as progress:
+            # Slice Audio with pydup
+            segment_in = int(segment.in_point*1000)
+            segment_out = int(segment.out_point*1000)
+            segmentAudio = audio[segment_in:segment_out]
+
+            # transcription using OpenAI Whisper
+            segments, info = model.transcribe(np.frombuffer(segmentAudio.raw_data, np.int16).flatten().astype(np.float32) / 32768.0, beam_size=5)
+            segments = list(segments)  # The transcription will actually run here.
+            summarized_segments = condense_segments(segments, 1)
+
+            timecode_corrected_segments = []
+
+            for s in summarized_segments:
+                timecode_corrected_segments.append({'id':s['id'],'start':segment.in_point + s['start'], 'end': segment.in_point+s['end'], 'text': s['text']})
+
+            transcribed_segments.append(transcribed_segment(segment.speaker, timecode_corrected_segments))
+            
+            progress.update(segment.out_point)
+
+    return transcribed_segments
+
 def get_text(transcribed_segments):
     text = ""
     for segment in transcribed_segments:

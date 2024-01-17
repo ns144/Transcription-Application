@@ -7,7 +7,7 @@ from transcription.speaker_diarization import speaker_diarization
 from utils.file_utils import write_srt, write_txt, write_docx
 from utils.s3_utils import upload_file, get_file
 from utils.api_utils import update_status, get_tasks
-from transcription.transcription_utils import condense_speakers, transcribe_segments, transcribe_segments_no_print, transcribe_segments_pydup, get_text
+from transcription.transcription_utils import condense_speakers, transcribe_segments, transcribe_segments_no_print, transcribe_segments_pydup, transcribe_segments_faster_whisper, get_text
 
 import time
 
@@ -71,7 +71,15 @@ def transcribe(tasks):
             end = time.time()
             elapsed = end-start
             print("Transcription with Pydup took:", elapsed, "Seconds")
-
+            # Transcription with Faster Whisper
+            try:
+                start = time.time()
+                transcribed_segments = transcribe_segments_faster_whisper(normed_audio, speaker_segments)
+                end = time.time()
+                elapsed = end-start
+                print("Transcription with Faster Whisper took:", elapsed, "Seconds")
+            except Exception as error:
+                print("Faster Whisper failed: ", error)
             print("Write Files")
             # Raw text of transcription
             text = get_text(transcribed_segments)
