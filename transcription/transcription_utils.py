@@ -98,6 +98,7 @@ def transcribe_segments(filename, speaker_segments):
        
         # transcription using OpenAI Whisper
         result = model.transcribe(segmentName)
+        
         summarized_segments = condense_segments(result['segments'], 1)
         timecode_corrected_segments = []
 
@@ -162,6 +163,7 @@ def transcribe_segments_pydup(filename, speaker_segments):
 
             # transcription using OpenAI Whisper
             result = model.transcribe(np.frombuffer(segmentAudio.raw_data, np.int16).flatten().astype(np.float32) / 32768.0)
+            print(result['segments'])
             summarized_segments = condense_segments(result['segments'], 1)
 
             timecode_corrected_segments = []
@@ -206,10 +208,16 @@ def transcribe_segments_faster_whisper(filename, speaker_segments):
             segment_out = int(segment.out_point*1000)
             segmentAudio = audio[segment_in:segment_out]
 
-            # transcription using OpenAI Whisper
+            # transcription using Faster Whisper
             segments, info = model.transcribe(np.frombuffer(segmentAudio.raw_data, np.int16).flatten().astype(np.float32) / 32768.0, beam_size=5)
             segments = list(segments)  # The transcription will actually run here.
-            summarized_segments = condense_segments(segments, 1)
+
+            whisper_segs = []
+            for fastseg in segments:
+                whisper_seg = {"id": fastseg.id, "start": fastseg.start, "end": fastseg.end, "text": fastseg.text}
+                whisper_segs.append(whisper_seg)
+
+            summarized_segments = condense_segments(whisper_segs, 1)
 
             timecode_corrected_segments = []
 
