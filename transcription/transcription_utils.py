@@ -163,7 +163,6 @@ def transcribe_segments_pydup(filename, speaker_segments):
 
             # transcription using OpenAI Whisper
             result = model.transcribe(np.frombuffer(segmentAudio.raw_data, np.int16).flatten().astype(np.float32) / 32768.0)
-            print(result['segments'])
             summarized_segments = condense_segments(result['segments'], 1)
 
             timecode_corrected_segments = []
