@@ -177,14 +177,14 @@ def transcribe_segments_pydup(filename, speaker_segments):
     return transcribed_segments
 
 
-def transcribe_segments_faster_whisper(filename, speaker_segments):
+def transcribe_segments_faster_whisper(filename, speaker_segments, model_size):
     from pydub import AudioSegment
     import numpy as np
     import tqdm
     from faster_whisper import WhisperModel
 
     #model_size = "large-v3"
-    model_size = "small"
+    #model_size = "small"
     # Run on GPU with FP16
     model = WhisperModel(model_size, device="cuda", compute_type="float16")
     transcribed_segments = []
