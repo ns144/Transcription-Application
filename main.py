@@ -35,6 +35,7 @@ def transcribe(tasks):
 
     for file in files:
         filename = str(file["fileNameWithExt"])
+        filepath = Path(filename)
         try:
             update_status(file["id"], "PROCESSING", secret)
             print("Transcription of:"+filename)
@@ -42,7 +43,7 @@ def transcribe(tasks):
             get_file(filename, secret)
             # Normalization of Audio
             print("Convert File to Wav")
-            subprocess.call(['ffmpeg', '-i', filename,"-filter:a", "loudnorm=I=-20:LRA=4","-ac", "1","-ar","48000", 'audio.wav', '-y', '-loglevel', "quiet"])
+            subprocess.call(['ffmpeg', '-i', filename,"-ac", "1","-ar","48000", 'audio.wav', '-y', '-loglevel', "quiet"])
             normed_audio = 'audio.wav'
             # Run speaker diarization
             print("Speaker Diarization")
@@ -93,7 +94,6 @@ def transcribe(tasks):
             segments_as_dict = dict()
             segments_as_dict["segments"] = srt_segments
             # File paths for srt, txt and docx
-            filepath = Path(filename)
             srt_path = filepath.with_suffix('.srt')
             txt_path = filepath.with_suffix('.txt')
             docx_path = filepath.with_suffix('.docx')
