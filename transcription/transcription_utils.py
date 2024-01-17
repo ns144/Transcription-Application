@@ -176,6 +176,7 @@ def transcribe_segments_pydup(filename, speaker_segments):
 
     return transcribed_segments
 
+
 def transcribe_segments_faster_whisper(filename, speaker_segments):
     from pydub import AudioSegment
     import numpy as np
