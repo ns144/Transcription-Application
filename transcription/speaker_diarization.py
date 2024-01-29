@@ -22,7 +22,7 @@ def speaker_diarization(sourcefile, secret):
   # sourcefile = 'audio.wav'
   # apply the pipeline to an audio file
   with ProgressHook() as hook:
-    diarization = pipeline(audio_in_memory, min_speakers=2, max_speakers=8, hook=hook)
+    diarization = pipeline(audio_in_memory, hook=hook)
 
   speaker_segments = []
   
