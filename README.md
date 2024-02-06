@@ -82,6 +82,10 @@ python main.py
 
 
 
+At the moment Faster Whisper does not support CUDA 12. If you want to use CUDA 12 and benefit from Faster Whispers performance increase you have to build CTranslate2 manually: https://github.com/OpenNMT/CTranslate2/issues/1250 
+
+
+
 ## Usage
 
 If you just want to test our already deployed application, proceed as follows:
