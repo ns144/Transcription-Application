@@ -117,7 +117,6 @@ def transcribe_segments_no_print(filename, speaker_segments):
 
     for segment in speaker_segments:
         # render a wav for the current segment for the transcription
-        #print("TRANSCRIPTION OF SEGMENT:", str(segment.in_point))
         segmentName = "segment_" + str(segment.in_point) + ".wav"
         subprocess.call(['ffmpeg', '-i', filename, '-ss', str(segment.in_point), '-to', str(segment.out_point), segmentName, '-y','-loglevel', "quiet"])
        
