@@ -6,7 +6,7 @@ from get_secret import get_secret
 from transcription.speaker_diarization import speaker_diarization
 from utils.file_utils import write_srt, write_txt, write_docx
 from utils.s3_utils import upload_file, get_file
-from utils.api_utils import update_status, get_tasks
+from utils.api_utils import update_status, get_tasks, shutdown_ec2
 from transcription.transcription_utils import condense_speakers, transcribe_segments, transcribe_segments_no_print, transcribe_segments_pydup, transcribe_segments_faster_whisper, get_text
 import torch
 from pathlib import Path
@@ -32,6 +32,7 @@ def refresh_tasks():
             transcribe(tasks['transcripts'][0])
         else:
             print(f"No more Tasks in Queue - Shutting Down {instanceid}")
+            shutdown_ec2(instanceid, secret) 
             break
 
 

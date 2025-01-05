@@ -59,3 +59,25 @@ def update_status(id, status, secret, preview=None):
         # handle the exception
         print("An exception occurred:", error)
         return None
+    
+def shutdown_ec2(ec2_id, secret):
+    STOP_URL = secret["STOP_URL"]
+    TRANSCRIPTION_SERVICE_API_KEY = secret["TRANSCRIPTION_SERVICE_API_KEY"]
+    params = {'key': TRANSCRIPTION_SERVICE_API_KEY, 'ec2_id': ec2_id}
+    # Make the API request
+    try:
+        response = requests.get(STOP_URL, params=params)
+        # Check if the status code is 200 (OK)
+        if response.status_code == 200:
+            # Parse the JSON response and assign it to the 'tasks' variable
+            res = response.json()
+            print("API call successful. Shutdown Machine: ", res)
+            return res
+        else:
+            # If the status code is not 200, print an error message
+            print(f"Error: API call failed with status code {response.status_code}")
+            return None
+    except Exception as error:
+        # handle the exception
+        print("An exception occurred:", error)
+        return None
