@@ -11,6 +11,13 @@ from transcription.transcription_utils import condense_speakers, transcribe_segm
 import torch
 from pathlib import Path
 import time
+import urllib.request
+
+try:
+    instanceid = urllib.request.urlopen('http://169.254.169.254/latest/meta-data/instance-id').read().decode()
+except Exception as error:
+    print(f"Could not get EC2 id: {error}")
+    instanceid = 0
 
 # Get Secret
 secret = get_secret()
@@ -24,7 +31,7 @@ def refresh_tasks():
         if tasks != None and tasks['transcripts'] != []:
             transcribe(tasks['transcripts'][0])
         else:
-            print("No more Tasks in Queue - Shutting Down")
+            print(f"No more Tasks in Queue - Shutting Down {instanceid}")
             break
 
 
