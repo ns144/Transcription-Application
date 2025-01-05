@@ -68,7 +68,7 @@ def transcribe(task):
         #print("Transcription with FFMPEG took:", elapsed, "Seconds")
         # Transcription with Faster Whisper
         try:
-            #raise Exception("You are on Windows!")
+            raise Exception("Do not use Faster Whisper!")
             start = time.time()
             transcribed_segments = transcribe_segments_faster_whisper(normed_audio, speaker_segments, "small")
             end = time.time()
