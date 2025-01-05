@@ -2,7 +2,7 @@
 
 The core functionality of [Ton-Texter](https://ton-texter.de) is to transcribe audio and video files. Therefore we use models based on OpenAIs [Whisper](https://github.com/openai/whisper). Additionally we perform a speaker diarization with [Pyannote](https://huggingface.co/pyannote). Although this implementation came with some problems at first, that needed to be resolved, it is now a key component of Ton-Texters offering and a unique selling point compared to other solutions that are solely based on Whisper.
 
-This repository represents the Python application that we execute on an Amazon EC2 Instance to run the transcription. Theoretically this application can also be run locally on a CUDA capable device. 
+This repository represents the Python application that we execute on an Amazon EC2 Instance to run the transcription. Theoretically this application can also be run locally on a CUDA capable device.
 
 ## Participants
 
@@ -12,13 +12,11 @@ This repository represents the Python application that we execute on an Amazon E
 | Nikolas Schaber | ns144        |
 | Torben Ziegler  | tz023        |
 
-
-
 ## How to run the application locally
 
 > Prerequisites: Your machine has a CUDA capable GPU and the necessary drivers already installed. Python does also have to be installed for the installation script to work.
 
-To run the application locally on your machine you will have to clone this repository and execute the `install.bat` file. This file should install all the necessary libraries.  
+To run the application locally on your machine you will have to clone this repository and execute the `install.bat` file. This file should install all the necessary libraries.
 
 Within our cloud infrastructure the application gets the necessary secrets to access our api, the S3 bucket, etc. from AWS Secrets Manager. If you want to use it locally you have to change the loading of the secret in the `main.py` file. Instead of:
 
@@ -44,13 +42,14 @@ As you might have notice already this does require you to setup an `env.json` fi
 
 ```json
 {
-    "API_URL": "",
-    "TRANSCRIPTION_SERVICE_API_KEY": "",
-    "MODIFY_URL": "",
-    "BUCKET_NAME": "",
-    "SECRET_KEY": "",
-    "ACCESS_KEY": "",
-    "HUG_TOKEN": ""
+  "API_URL": "",
+  "TRANSCRIPTION_SERVICE_API_KEY": "",
+  "MODIFY_URL": "",
+  "BUCKET_NAME": "",
+  "SECRET_KEY": "",
+  "ACCESS_KEY": "",
+  "HUG_TOKEN": "",
+  "STOP_URL": ""
 }
 ```
 
@@ -60,7 +59,7 @@ As you might have notice already this does require you to setup an `env.json` fi
 {"transcripts":[{"id":"","fileName":"Test123-6c70ad05-42a3-4fb5-b16e-c53f7db2b500","fileExtension":".wav","fileNameWithExt":"Test123-6c70ad05-42a3-4fb5-b16e-c53f7db2b500.wav","displayFilename":"Test123.wav","preview":"SPEAKER_00:  And so my fellow Americans, ask not what your country can do for you, ask what you can do for your country. \n","status":"SUCCESS","createdAt":"2024-02-01T10:04:14.318Z","updatedAt":"2024-02-01T10:05:08.804Z","userId":"ab63cb3a-98db-488b-9750-0133f49f6cfe"},...]}
 ```
 
-`TRANSCRIPTION_SERVICE_API_KEY ` :  The API key for our API
+`TRANSCRIPTION_SERVICE_API_KEY ` : The API key for our API
 
 `MODIFY_URL`: The endpoint to update the status of a transcript
 
@@ -72,19 +71,13 @@ As you might have notice already this does require you to setup an `env.json` fi
 
 `HUG_TOKEN`: Huggingface Token to get the Pyannote model for speaker diarization
 
-
-
 After you have setup this file you should be ready to run the application. Remember to activate the Python virtual environment and execute the `main.py` file:
 
 ```bash
 python main.py
 ```
 
-
-
-At the moment Faster Whisper does not support CUDA 12. If you want to use CUDA 12 and benefit from Faster Whispers performance increase you have to build CTranslate2 manually: https://github.com/OpenNMT/CTranslate2/issues/1250 
-
-
+At the moment Faster Whisper does not support CUDA 12. If you want to use CUDA 12 and benefit from Faster Whispers performance increase you have to build CTranslate2 manually: https://github.com/OpenNMT/CTranslate2/issues/1250
 
 ## Usage
 
