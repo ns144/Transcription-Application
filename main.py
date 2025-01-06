@@ -68,7 +68,7 @@ def refresh_tasks():
             transcribe(tasks['transcripts'][0])
         else:
             print(f"No more Tasks in Queue - Shutting Down {instanceid}")
-            # shutdown_ec2(instanceid, secret)
+            shutdown_ec2(instanceid, secret)
             break
 
 
@@ -93,8 +93,11 @@ def transcribe(task):
                         "-ar", "48000", 'audio.wav', '-y', '-loglevel', "quiet"])
         normed_audio = 'audio.wav'
         # Run speaker diarization
-        logger.info(processID + " - Speaker Diarization")
-        speaker_segments = speaker_diarization(normed_audio, secret)
+        try:
+            logger.info(processID + " - Speaker Diarization")
+            speaker_segments = speaker_diarization(normed_audio, secret)
+        except Exception as error:
+            logger.error("Speaker Diarization failed:", error)
         # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker
         logger.info(processID + " - Condense Speakers")
         speaker_segments = condense_speakers(speaker_segments)
