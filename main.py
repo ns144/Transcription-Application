@@ -13,6 +13,21 @@ import torch
 from pathlib import Path
 import time
 import urllib.request
+import logging
+import sys
+
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s]: %(message)s",
+    handlers=[
+        logging.FileHandler("/var/log/Transcription-Application.log"),
+        logging.StreamHandler(sys.stdout)  # Optional: Logs to console too
+    ]
+)
+
+# Replace print with logging
+print = logging.info
 
 try:
     instanceid = urllib.request.urlopen(
