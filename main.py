@@ -16,21 +16,36 @@ import urllib.request
 import logging
 import sys
 
-logger = logging.getLogger()
+# create logger with 'spam_application'
+logger = logging.getLogger('transcription-application')
+logger.setLevel(logging.INFO)
+# create file handler which logs even debug messages
+fh = logging.FileHandler('/var/log/Python-Transcription-Application.log')
+fh.setLevel(logging.INFO)
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s]: %(message)s",
-    handlers=[
-        logging.FileHandler("/var/log/Python-Transcription-Application.log"),
-        logging.StreamHandler(sys.stdout)  # Optional: Logs to console too
-    ]
-)
+formatter = logging.Formatter(
+    '%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+fh.setFormatter(formatter)
 
-# Replace print with logging
-print = logging.info
-logger.info('Started')
+logger.addHandler(fh)
+
+# Redirect print statements to the logger
+
+
+class LoggerWriter:
+    def __init__(self, level):
+        self.level = level
+
+    def write(self, message):
+        if message.strip():  # Avoid logging empty strings from newlines
+            self.level(message)
+
+    def flush(self):
+        pass  # For compatibility with file-like objects
+
+
+sys.stdout = LoggerWriter(logger.info)
+sys.stderr = LoggerWriter(logger.error)
 
 try:
     instanceid = urllib.request.urlopen(
