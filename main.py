@@ -68,7 +68,7 @@ def refresh_tasks():
             transcribe(tasks['transcripts'][0])
         else:
             print(f"No more Tasks in Queue - Shutting Down {instanceid}")
-            shutdown_ec2(instanceid, secret)
+            # shutdown_ec2(instanceid, secret)
             break
 
 
