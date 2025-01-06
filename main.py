@@ -16,18 +16,21 @@ import urllib.request
 import logging
 import sys
 
+logger = logging.getLogger()
+
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s [%(levelname)s]: %(message)s",
     handlers=[
-        logging.FileHandler("/var/log/Transcription-Application.log"),
+        logging.FileHandler("/var/log/Python-Transcription-Application.log"),
         logging.StreamHandler(sys.stdout)  # Optional: Logs to console too
     ]
 )
 
 # Replace print with logging
 print = logging.info
+logger.info('Started')
 
 try:
     instanceid = urllib.request.urlopen(
@@ -51,7 +54,7 @@ def refresh_tasks():
             transcribe(tasks['transcripts'][0])
         else:
             print(f"No more Tasks in Queue - Shutting Down {instanceid}")
-            shutdown_ec2(instanceid, secret)
+            # shutdown_ec2(instanceid, secret)
             break
 
 
