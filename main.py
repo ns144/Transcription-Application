@@ -16,7 +16,7 @@ import urllib.request
 import logging
 import sys
 
-# create logger with 'spam_application'
+# create logger with 'transcription_application'
 logger = logging.getLogger('transcription-application')
 logger.setLevel(logging.INFO)
 # create file handler which logs even debug messages
@@ -28,23 +28,6 @@ formatter = logging.Formatter('[%(levelname)s] %(message)s')
 fh.setFormatter(formatter)
 
 logger.addHandler(fh)
-
-# Redirect print statements to the logger
-
-# class LoggerWriter:
-#    def __init__(self, level):
-#        self.level = level
-#
-#    def write(self, message):
-#        if message.strip():  # Avoid logging empty strings from newlines
-#            self.level(message)
-#
-#    def flush(self):
-#        pass  # For compatibility with file-like objects
-#
-#
-# sys.stdout = LoggerWriter(logger.info)
-# sys.stderr = LoggerWriter(logger.error)
 
 try:
     instanceid = urllib.request.urlopen(
@@ -63,9 +46,9 @@ secret = get_secret()
 def refresh_tasks():
     Task = True
     while Task:
-        tasks = get_tasks(secret)
-        if tasks != None and tasks['transcripts'] != []:
-            transcribe(tasks['transcripts'][0])
+        task = get_tasks(secret)
+        if task != None and len(task) != 0:
+            transcribe(task)
         else:
             print(f"No more Tasks in Queue - Shutting Down {instanceid}")
             time.sleep(10)

@@ -1,6 +1,7 @@
 import requests
 import json
 
+
 def get_tasks(secret):
 
     # Get Api URL and Transcription Servive API Key
@@ -11,7 +12,7 @@ def get_tasks(secret):
 
     # Call API
     # Set up the parameters for the API request
-    params = {'key': TRANSCRIPTION_SERVICE_API_KEY, 'filter': 'PENDING'}
+    params = {'key': TRANSCRIPTION_SERVICE_API_KEY}
     # Make the API request
     try:
         response = requests.get(API_URL, params=params)
@@ -23,14 +24,15 @@ def get_tasks(secret):
             return tasks
         else:
             # If the status code is not 200, print an error message
-            print(f"Error: API call failed with status code {response.status_code}")
+            print(
+                f"Error: API call failed with status code {response.status_code}")
             return None
     except Exception as error:
         # handle the exception
         print("An exception occurred:", error)
         return None
 
-    
+
 def update_status(id, status, secret, preview=None):
     MODIFY_URL = secret["MODIFY_URL"] + id
     TRANSCRIPTION_SERVICE_API_KEY = secret["TRANSCRIPTION_SERVICE_API_KEY"]
@@ -53,13 +55,15 @@ def update_status(id, status, secret, preview=None):
             return updated
         else:
             # If the status code is not 200, print an error message
-            print(f"Error: API call failed with status code {response.status_code}")
+            print(
+                f"Error: API call failed with status code {response.status_code}")
             return None
     except Exception as error:
         # handle the exception
         print("An exception occurred:", error)
         return None
-    
+
+
 def shutdown_ec2(ec2_id, secret):
     STOP_URL = secret["STOP_URL"]
     TRANSCRIPTION_SERVICE_API_KEY = secret["TRANSCRIPTION_SERVICE_API_KEY"]
@@ -75,7 +79,8 @@ def shutdown_ec2(ec2_id, secret):
             return res
         else:
             # If the status code is not 200, print an error message
-            print(f"Error: API call failed with status code {response.status_code}")
+            print(
+                f"Error: API call failed with status code {response.status_code}")
             return None
     except Exception as error:
         # handle the exception
