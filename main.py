@@ -39,7 +39,7 @@ except Exception as error:
 # Get Secret
 secret = get_secret()
 # with open('env.json') as secret_file:
-#    secret = json.load(secret_file)
+#     secret = json.load(secret_file)
 
 
 def refresh_tasks():
@@ -131,7 +131,7 @@ def transcribe(task):
         update_status(file["id"], "SUCCESS", secret, text[0:500])
         logger.info(processID + " - Transcription Done")
     except Exception as error:
-        logger.error("Transcription failed:" + error)
+        logger.error("Transcription failed:" + str(error))
         update_status(file["id"], "FAILED", secret)
 
 

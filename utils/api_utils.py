@@ -8,7 +8,7 @@ def get_tasks(secret):
     API_URL = secret["API_URL"]
     TRANSCRIPTION_SERVICE_API_KEY = secret["TRANSCRIPTION_SERVICE_API_KEY"]
 
-    print(str(API_URL)+" Key: "+str(TRANSCRIPTION_SERVICE_API_KEY))
+    print("Get Tasks from: "+str(API_URL))
 
     # Call API
     # Set up the parameters for the API request
