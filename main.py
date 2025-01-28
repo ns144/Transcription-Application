@@ -1,27 +1,26 @@
 import os
 import subprocess
-import requests
-import json
-from get_secret import get_secret
+
+# from get_secret import get_secret
 from transcription.speaker_diarization import speaker_diarization
 from utils.file_utils import write_srt, write_txt, write_docx
 from utils.s3_utils import upload_file, get_file
 from utils.api_utils import update_status, get_tasks, shutdown_ec2
-from transcription.transcription_utils import condense_speakers, transcribe_segments, transcribe_segments_no_print, transcribe_segments_pydup, transcribe_segments_faster_whisper, get_text
+from transcription.transcription_utils import condense_speakers, get_text
 from transcription.whisper_v3 import transcribe_segments_whisperV3
 import torch
 from pathlib import Path
 import time
 import urllib.request
 import logging
-import sys
+import json
 
 # create logger with 'transcription_application'
 logger = logging.getLogger('transcription-application')
 logger.setLevel(logging.INFO)
 # create file handler which logs even debug messages
-fh = logging.FileHandler('/var/log/Python-Transcription-Application.log')
-# fh = logging.FileHandler('Python-Transcription-Application.log')
+# fh = logging.FileHandler('/var/log/Python-Transcription-Application.log')
+fh = logging.FileHandler('Python-Transcription-Application.log')
 fh.setLevel(logging.INFO)
 
 formatter = logging.Formatter('[%(levelname)s] %(message)s')
@@ -38,9 +37,9 @@ except Exception as error:
 
 
 # Get Secret
-secret = get_secret()
-# with open('env.json') as secret_file:
-#    secret = json.load(secret_file)
+# secret = get_secret()
+with open('env.json') as secret_file:
+    secret = json.load(secret_file)
 
 
 def refresh_tasks():
@@ -87,38 +86,16 @@ def transcribe(task):
         speaker_segments = condense_speakers(speaker_segments)
         # transcription of the condensed segments
         logger.info(processID + " - Transcribe Segments")
-        # Transcription with FFMPEG
-        # start = time.time()
-        # transcribed_segments = transcribe_segments_no_print(normed_audio, speaker_segments)
-        # end = time.time()
-        # elapsed = end-start
-        # print("Transcription with FFMPEG took:", elapsed, "Seconds")
-        # Transcription with FFMPEG
-        # start = time.time()
-        # transcribed_segments = transcribe_segments(normed_audio, speaker_segments)
-        # end = time.time()
-        # elapsed = end-start
-        # print("Transcription with FFMPEG took:", elapsed, "Seconds")
-        # Transcription with Faster Whisper
-        try:
-            raise Exception("Do not use Faster Whisper!")
-            start = time.time()
-            transcribed_segments = transcribe_segments_faster_whisper(
-                normed_audio, speaker_segments, "small")
-            end = time.time()
-            elapsed = end-start
-            print("Transcription with Faster Whisper Small took:",
-                  elapsed, "Seconds")
-        except Exception as error:
-            # print("Faster Whisper failed: ", error)
-            # Transcription with WhisperV3
-            start = time.time()
-            transcribed_segments = transcribe_segments_whisperV3(
-                normed_audio, speaker_segments)
-            end = time.time()
-            elapsed = end-start
-            logger.info(
-                f"{processID} - Transcription with Pydup / WhisperV3 Turbo took: {elapsed} Seconds")
+
+        # Transcription with Whisper V3
+        start = time.time()
+        transcribed_segments = transcribe_segments_whisperV3(
+            normed_audio, speaker_segments)
+        end = time.time()
+        elapsed = end-start
+        logger.info(
+            f"{processID} - Transcription with Pydup / WhisperV3 Turbo took: {elapsed} Seconds")
+
         logger.info(processID + " - Write Files")
         # Raw text of transcription
         text = get_text(transcribed_segments)
