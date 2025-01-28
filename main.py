@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-# from get_secret import get_secret
+from get_secret import get_secret
 from transcription.speaker_diarization import speaker_diarization
 from utils.file_utils import write_srt, write_txt, write_docx
 from utils.s3_utils import upload_file, get_file
@@ -19,8 +19,8 @@ import json
 logger = logging.getLogger('transcription-application')
 logger.setLevel(logging.INFO)
 # create file handler which logs even debug messages
-# fh = logging.FileHandler('/var/log/Python-Transcription-Application.log')
-fh = logging.FileHandler('Python-Transcription-Application.log')
+fh = logging.FileHandler('/var/log/Python-Transcription-Application.log')
+# fh = logging.FileHandler('Python-Transcription-Application.log')
 fh.setLevel(logging.INFO)
 
 formatter = logging.Formatter('[%(levelname)s] %(message)s')
@@ -37,9 +37,9 @@ except Exception as error:
 
 
 # Get Secret
-# secret = get_secret()
-with open('env.json') as secret_file:
-    secret = json.load(secret_file)
+secret = get_secret()
+# with open('env.json') as secret_file:
+#    secret = json.load(secret_file)
 
 
 def refresh_tasks():
