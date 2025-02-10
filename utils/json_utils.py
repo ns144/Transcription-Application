@@ -41,7 +41,7 @@ def heartbeat(id, secret):
         if response.status_code == 200:
             # Parse the JSON response and assign it to the 'tasks' variable
             updated = response.json()
-            print("API call successful. Updated Task:", updated)
+            # print("API call successful. Updated Task:", updated)
             return updated
         else:
             # If the status code is not 200, print an error message
