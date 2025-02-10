@@ -72,7 +72,7 @@ def refresh_tasks():
             transcribe(task)
         else:
             print(f"No more Tasks in Queue - Shutting Down {instanceid}")
-            time.sleep(10)
+            time.sleep(5)
             shutdown_ec2(instanceid, secret)
             break
 

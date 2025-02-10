@@ -103,7 +103,7 @@ def transcribe_segments_whisperV3(filename, speaker_segments):
 
     total = speaker_segments[-1].out_point
     last_update = time.time()
-    interval = 5
+    interval = 3
 
     for segment in speaker_segments:
         percentage = int(
