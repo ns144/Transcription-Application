@@ -5,6 +5,7 @@ from get_secret import get_secret
 from transcription.speaker_diarization import speaker_diarization
 from utils.file_utils import write_srt, write_txt, write_docx
 from utils.s3_utils import upload_file, get_file
+from utils.json_utils import heartbeat, update_json
 from utils.api_utils import update_status, get_tasks, shutdown_ec2
 from transcription.transcription_utils import condense_speakers, get_text
 from transcription.whisper_v3 import transcribe_segments_whisperV3
@@ -13,6 +14,7 @@ from pathlib import Path
 import time
 import urllib.request
 import logging
+import threading
 import json
 
 # create logger with 'transcription_application'
@@ -39,7 +41,27 @@ except Exception as error:
 # Get Secret
 secret = get_secret()
 # with open('env.json') as secret_file:
-#     secret = json.load(secret_file)
+#    secret = json.load(secret_file)
+
+stop_event = threading.Event()
+
+
+def call_hearbeat(processID, secret):
+    while not stop_event.is_set():
+        heartbeat(processID, secret)
+        time.sleep(10)
+
+
+def start_hearbeat_thread(processID, secret):
+    # Start the progress reading thread
+    hearbeat_thread = threading.Thread(target=call_hearbeat, args=(
+                                       processID, secret), daemon=True)
+    hearbeat_thread.start()
+    return hearbeat_thread
+
+
+def stop_heartbeat_thread():
+    stop_event.set()
 
 
 def refresh_tasks():
@@ -67,6 +89,8 @@ def transcribe(task):
     processID = str(file["userId"])+"."+str(file["id"])
     try:
         update_status(file["id"], "PROCESSING", secret)
+        update_json("PROCESSING", 0, 0)
+        start_hearbeat_thread(processID, secret)
         logger.info(processID + " - Transcription of:"+filename)
         # Download file from S3
         get_file(filename, secret)
@@ -128,6 +152,7 @@ def transcribe(task):
         os.remove(srt_path)
         os.remove(txt_path)
         os.remove(docx_path)
+        stop_heartbeat_thread()
         update_status(file["id"], "SUCCESS", secret, text[0:500])
         logger.info(processID + " - Transcription Done")
     except Exception as error:

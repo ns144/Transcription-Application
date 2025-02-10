@@ -1,6 +1,7 @@
 from transcription.transcription_utils import condense_segments, condense_speakers
 from speaker_segment import transcribed_segment
 import re
+import time
 
 
 def condense_chunks(segments: list, sentences: int = 1, inprecise: bool = True):
@@ -59,7 +60,12 @@ def transcribe_segments_whisperV3(filename, speaker_segments):
     from pydub import AudioSegment
     import numpy as np
     import tqdm
+    import sys
+    import os
     from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
+    sys.path.insert(0, os.path.abspath(
+        os.path.join(os.path.dirname(__file__), '..')))
+    from utils.json_utils import update_json
     transcribed_segments = []
 
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
@@ -96,8 +102,22 @@ def transcribe_segments_whisperV3(filename, speaker_segments):
         audio = audio.set_channels(1)
 
     total = speaker_segments[-1].out_point
+    last_update = time.time()
+    interval = 5
 
     for segment in speaker_segments:
+        percentage = int(
+            (segment.in_point / speaker_segments[-1].in_point)*100)
+
+        current_time = time.time()
+        if current_time - last_update >= interval:
+            last_update = current_time
+            update_json("TRANSCRIPTION", prog_speaker=100,
+                        prog_transcription=percentage)
+        if percentage == 100:
+            update_json("TRANSCRIPTION", prog_speaker=100,
+                        prog_transcription=percentage)
+
         with tqdm.tqdm(total=total) as progress:
             # Slice Audio with pydup
             segment_in = int(segment.in_point*1000)
@@ -107,7 +127,7 @@ def transcribe_segments_whisperV3(filename, speaker_segments):
             # transcription using OpenAI Whisper
             result = pipe(np.frombuffer(
                 segmentAudio.raw_data, np.int16).flatten().astype(np.float32) / 32768.0, return_timestamps=True)
-            print(result)
+            # print(result)
             summarized_segments = condense_chunks(result['chunks'], 1)
 
             timecode_corrected_segments = []
