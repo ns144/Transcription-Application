@@ -90,7 +90,7 @@ def transcribe(task):
     try:
         update_status(file["id"], "PROCESSING", secret)
         update_json("PROCESSING", 0, 0)
-        start_hearbeat_thread(processID, secret)
+        start_hearbeat_thread(file["id"], secret)
         logger.info(processID + " - Transcription of:"+filename)
         # Download file from S3
         get_file(filename, secret)
