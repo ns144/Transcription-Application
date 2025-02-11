@@ -3,7 +3,7 @@ import subprocess
 
 def run_tests():
     result = subprocess.run(
-        ["python", "-m", "unittest", "discover"], capture_output=True, text=True)
+        ["python3", "-m", "unittest", "discover"], capture_output=True, text=True)
 
     print(result.stdout)
     print(result.stderr)
