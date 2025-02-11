@@ -161,7 +161,7 @@ cython_debug/
 
 # Media Files
 *.mp3
-*.wav
+audio.wav
 ffmpeg.exe
 ffprobe.exe
 *.srt

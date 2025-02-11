@@ -21,8 +21,11 @@ import json
 logger = logging.getLogger('transcription-application')
 logger.setLevel(logging.INFO)
 # create file handler which logs even debug messages
-fh = logging.FileHandler('/var/log/Python-Transcription-Application.log')
-# fh = logging.FileHandler('Python-Transcription-Application.log')
+try:
+    fh = logging.FileHandler('/var/log/Python-Transcription-Application.log')
+except Exception as error:
+    print(error)
+    fh = logging.FileHandler('Python-Transcription-Application.log')
 fh.setLevel(logging.INFO)
 
 formatter = logging.Formatter('[%(levelname)s] %(message)s')

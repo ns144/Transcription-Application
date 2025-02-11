@@ -3,9 +3,9 @@ import subprocess
 import whisper
 import os
 from speaker_segment import transcribed_segment
+
+
 # condense transcribed words into full sentences
-
-
 def condense_segments(segments: list, sentences: int = 1, inprecise: bool = True):
     segments_count = len(segments)
     summarized_segments = []
@@ -17,7 +17,6 @@ def condense_segments(segments: list, sentences: int = 1, inprecise: bool = True
     for index, segment in enumerate(segments):
 
         last_line = index >= segments_count-1
-        # print("Segments count: ", segments_count, " Current Index: ", index)
         # when start save start of segment
         if (new_start):
             starttime = segment['start']
@@ -53,9 +52,8 @@ def condense_segments(segments: list, sentences: int = 1, inprecise: bool = True
 
     return summarized_segments
 
+
 # speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker
-
-
 def condense_speakers(speaker_segments):
     condensedSpeakers = []
 
@@ -88,6 +86,7 @@ def condense_speakers(speaker_segments):
     return condensedSpeakers
 
 
+# Returns the combined text of a list of transcribed_segments
 def get_text(transcribed_segments):
     text = ""
     for segment in transcribed_segments:
