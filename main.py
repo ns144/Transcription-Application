@@ -177,7 +177,7 @@ def transcribe(task):
         update_status(file["id"], "FAILED", secret)
 
 
-update_json("PROCESSING", 0, 0, "test")
+update_json("PROCESSING", 0, 0, 0)
 start_hearbeat_thread(secret)
 refresh_tasks()
 stop_heartbeat_thread()
