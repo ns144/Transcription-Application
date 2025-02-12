@@ -15,7 +15,7 @@ class TestHeartbeatThread(unittest.TestCase):
         from main import start_hearbeat_thread, stop_heartbeat_thread
         from get_secret import get_secret
         secret = get_secret()
-        thread = start_hearbeat_thread("cm6z5dprl0001l203zdelpo6a", secret)
+        thread = start_hearbeat_thread(secret)
         # Check if thread is alive / started correctly
         self.assertTrue(thread.is_alive())
         time.sleep(30)
@@ -25,7 +25,7 @@ class TestHeartbeatThread(unittest.TestCase):
         self.assertFalse(thread.is_alive())
 
         # Check if threat can be restarted
-        thread = start_hearbeat_thread("cm6z5dprl0001l203zdelpo6a", secret)
+        thread = start_hearbeat_thread(secret)
         # Check if thread is alive / started correctly
         self.assertTrue(thread.is_alive())
         time.sleep(30)
