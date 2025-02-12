@@ -33,12 +33,16 @@ def get_tasks(secret):
         return None
 
 
-def update_status(id, status, secret, preview=None):
+def update_status(id, status, secret, preview=None, prog_speak=0, prog_trans=0):
     MODIFY_URL = secret["MODIFY_URL"] + id
     TRANSCRIPTION_SERVICE_API_KEY = secret["TRANSCRIPTION_SERVICE_API_KEY"]
     params = {'key': TRANSCRIPTION_SERVICE_API_KEY}
     if preview == None:
         body = {'status': status}
+
+    elif prog_speak != 0 and prog_trans != 0:
+        body = {'status': status, 'speakerDiarizationProgress': prog_speak,
+                'transcriptionProgress': prog_trans, 'preview': preview}
     else:
         body = {'status': status, 'preview': preview}
 

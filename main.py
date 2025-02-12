@@ -170,7 +170,7 @@ def transcribe(task):
         update_json("SUCCESS", prog_speaker=100,
                     prog_transcription=100, transcript_id=transcript_id)
         # stop_heartbeat_thread()
-        update_status(file["id"], "SUCCESS", secret, text[0:500])
+        update_status(file["id"], "SUCCESS", secret, text[0:500], 100, 100)
         logger.info(processID + " - Transcription Done")
     except Exception as error:
         logger.exception("Transcription failed:" + str(error))
