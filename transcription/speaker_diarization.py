@@ -61,7 +61,7 @@ def speaker_diarization(sourcefile, secret, transcript_id):
     audio_in_memory = {"waveform": waveform, "sample_rate": sample_rate}
     # sourcefile = 'audio.wav'
     # apply the pipeline to an audio file
-    with JSONProgressHook() as hook:
+    with JSONProgressHook as hook:
         diarization = pipeline(audio_in_memory, hook=hook)
 
     speaker_segments = []
