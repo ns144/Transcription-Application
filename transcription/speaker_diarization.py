@@ -7,39 +7,29 @@ import json
 import time
 import sys
 import os
-from rich.console import Console
-from rich.live import Live
-from rich.progress import Progress
+from typing import Any, Mapping, Optional
 
 
 class JSONProgressHook(ProgressHook):
 
-    def __init__(self, transcript_id, json_file="progress.json", interval=3, transient=False):
+    def __init__(self, json_file="progress.json", interval=3, transient=False):
         super().__init__(transient=transient)
         self.json_file = json_file
         self.interval = interval
-        self.transcript_id = transcript_id
         self.last_update = time.time()
         self.progress_data = {}  # Store step-wise progress
 
-        # To manage the live display manually
-        self.console = Console()
-        self.live = None  # This will store the live object
-        self.progress = None  # The progress bar itself
-        self.task = None  # To track the progress bar task
-
-    def __call__(self, step_name, step_artifact, file=None, total=None, completed=None):
+    def __call__(self, step_name: str, step_artifact: Any, file: Optional[Mapping] = None, total: Optional[int] = None, completed: Optional[int] = None):
         sys.path.insert(0, os.path.abspath(
             os.path.join(os.path.dirname(__file__), '..')))
         from utils.json_utils import update_json
-
         if completed is None:
             completed = total = 1  # Default behavior as in the original ProgressHook
 
         if step_name == "segmentation":
             percentage = (completed / total) * 20 if total else 20
         elif step_name == "embeddings":
-            percentage = 20 + (completed / total) * 80 if total else 100
+            percentage = 20+(completed / total) * 80 if total else 100
         elif step_name == "speaker_counting":
             percentage = 20
         else:
@@ -49,25 +39,9 @@ class JSONProgressHook(ProgressHook):
         current_time = time.time()
         if current_time - self.last_update >= self.interval:
             self.last_update = current_time
-            update_json("SPEAKER_DIARIZATION", prog_speaker=percentage,
-                        transcript_id=self.transcript_id)
-
-        # Only update the live display if it's not already live
-        if self.live is None:
-            self.progress = Progress()  # Create progress
-            self.live = Live(self.progress, refresh_per_second=10)
-            self.live.start()  # Start live display
-
-        # Updating the progress bar with current step's percentage
-        if not self.task:
-            self.task = self.progress.add_task("Processing...", total=100)
-
-        self.progress.update(self.task, completed=percentage)
-
+            update_json("SPEAKER_DIARIZATION", prog_speaker=percentage)
         if percentage == 100:
-            update_json("SPEAKER_DIARIZATION", prog_speaker=percentage,
-                        transcript_id=self.transcript_id)
-            self.live.stop()  # Stop live display when finished
+            update_json("SPEAKER_DIARIZATION", prog_speaker=percentage)
 
 
 def speaker_diarization(sourcefile, secret, transcript_id):
@@ -88,7 +62,7 @@ def speaker_diarization(sourcefile, secret, transcript_id):
     audio_in_memory = {"waveform": waveform, "sample_rate": sample_rate}
     # sourcefile = 'audio.wav'
     # apply the pipeline to an audio file
-    with JSONProgressHook(transcript_id) as hook:
+    with JSONProgressHook() as hook:
         diarization = pipeline(audio_in_memory, hook=hook)
 
     speaker_segments = []
