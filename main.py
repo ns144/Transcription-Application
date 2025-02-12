@@ -167,7 +167,7 @@ def transcribe(task):
         os.remove(txt_path)
         os.remove(docx_path)
         stop_heartbeat_thread()
-        time.sleep(0.5)
+        time.sleep(1)
         update_status(file["id"], "SUCCESS", secret, text[0:500])
         logger.info(processID + " - Transcription Done")
     except Exception as error:
