@@ -98,12 +98,12 @@ def transcribe(task):
         update_json("PROCESSING", 0, 0, transcript_id)
 
         # Only create thread if it does not already exist
-        if stop_event.is_set():
-            stop_event.clear()
-            logger.info(processID + " - Heartbeat Threat restarted")
-        else:
-            start_hearbeat_thread(secret)
-            logger.info(processID + " - Heartbeat Threat started")
+        # if stop_event.is_set():
+        #    stop_event.clear()
+        #    logger.info(processID + " - Heartbeat Threat restarted")
+        # else:
+        #    start_hearbeat_thread(secret)
+        #    logger.info(processID + " - Heartbeat Threat started")
         logger.info(processID + " - Transcription of:"+filename)
         # Download file from S3
         get_file(filename, secret)
@@ -119,6 +119,7 @@ def transcribe(task):
                 normed_audio, secret, transcript_id)
         except Exception as error:
             logger.exception("Speaker Diarization failed:" + str(error))
+
         # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker
         logger.info(processID + " - Condense Speakers")
         speaker_segments = condense_speakers(speaker_segments)
@@ -166,8 +167,9 @@ def transcribe(task):
         os.remove(srt_path)
         os.remove(txt_path)
         os.remove(docx_path)
-        stop_heartbeat_thread()
-        time.sleep(1)
+        update_json("SUCCESS", prog_speaker=100,
+                    prog_transcription=100, transcript_id=transcript_id)
+        # stop_heartbeat_thread()
         update_status(file["id"], "SUCCESS", secret, text[0:500])
         logger.info(processID + " - Transcription Done")
     except Exception as error:
@@ -175,4 +177,6 @@ def transcribe(task):
         update_status(file["id"], "FAILED", secret)
 
 
+update_json("PROCESSING", 0, 0, "test")
+start_hearbeat_thread(secret)
 refresh_tasks()

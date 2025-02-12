@@ -12,6 +12,8 @@ def update_json(status, prog_speaker=0, prog_transcription=0, transcript_id=0):
         with open('progress.json', 'r') as file:
             progress_data = json.load(file)
             transcript_id = progress_data['TRANSCRIPT_ID']
+    if transcript_id == "test":
+        return None
 
     progress_data = {
         "STATUS": status,

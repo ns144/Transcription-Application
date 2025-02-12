@@ -13,13 +13,13 @@ class TestJSONUtils(unittest.TestCase):
     def test_update_json(self):
         from utils.json_utils import update_json
 
-        update_json("PROCESSING", 10, 0, 0)
+        update_json("PROCESSING", 10, 0, 1)
 
         with open('progress.json') as secret_file:
             progress = json.load(secret_file)
         # Check if content matches expectations
         self.assertEqual(progress, {'STATUS': 'PROCESSING', 'PROG_TRANSCRIPTION': 0,
-                         'PROG_SPEAKER': 10, 'TRANSCRIPT_ID': 0}, "JSON not correctly saved / updated!")
+                         'PROG_SPEAKER': 10, 'TRANSCRIPT_ID': 1}, "JSON not correctly saved / updated!")
 
 
 if __name__ == '__main__':
