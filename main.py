@@ -118,7 +118,7 @@ def transcribe(task):
             speaker_segments = speaker_diarization(
                 normed_audio, secret, transcript_id)
         except Exception as error:
-            logger.error("Speaker Diarization failed:" + error)
+            logger.error("Speaker Diarization failed:" + str(error))
         # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker
         logger.info(processID + " - Condense Speakers")
         speaker_segments = condense_speakers(speaker_segments)
