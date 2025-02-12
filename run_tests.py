@@ -25,7 +25,7 @@ def run_tests():
         except Exception as error:
             print(f"Could not get EC2 id: {error}")
             instanceid = 0
-            exit(1)
+            # exit(1)
 
         params = {'key': TRANSCRIPTION_SERVICE_API_KEY, 'ec2_id': instanceid}
 
@@ -42,8 +42,7 @@ def run_tests():
             except Exception as error:
                 print("An exception occurred during the API call:", error)
 
-        # Fire and forget the API call in a separate thread
-        threading.Thread(target=make_api_call, daemon=True).start()
+        make_api_call()
     else:
         print("Tests failed!")
 
