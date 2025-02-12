@@ -25,7 +25,7 @@ def update_json(status, prog_speaker=0, prog_transcription=0, transcript_id=0):
 def heartbeat(secret):
     sys.path.insert(0, os.path.abspath(
         os.path.join(os.path.dirname(__file__), '..')))
-
+    from main import logger
     try:
         with open('progress.json', 'r') as file:
             progress_data = json.load(file)
@@ -48,13 +48,13 @@ def heartbeat(secret):
         if response.status_code == 200:
             # Parse the JSON response and assign it to the 'tasks' variable
             updated = response.json()
-            print(
+            logger.info(
                 f"API call successfull with status code {response.status_code} for API call = {str(MODIFY_URL)} with body = {str(json_body)}")
             # print("API call successful. Updated Task:", updated)
             return updated
         else:
             # If the status code is not 200, print an error message
-            print(
+            logger.error(
                 f"Error: API call failed with status code {response.status_code} for API call = {str(MODIFY_URL)} with body = {str(json_body)}")
             return None
     except FileNotFoundError:
