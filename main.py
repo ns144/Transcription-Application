@@ -52,7 +52,7 @@ stop_event = threading.Event()
 def call_hearbeat(processID, secret):
     while not stop_event.is_set():
         heartbeat(processID, secret)
-        time.sleep(10)
+        time.sleep(5)
 
 
 def start_hearbeat_thread(processID, secret):
