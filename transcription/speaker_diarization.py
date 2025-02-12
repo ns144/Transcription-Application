@@ -13,7 +13,6 @@ from typing import Any, Mapping, Optional
 class JSONProgressHook:
 
     def __init__(self, json_file="progress.json", interval=3, transient=False):
-        super().__init__(transient=transient)
         self.json_file = json_file
         self.interval = interval
         self.last_update = time.time()
