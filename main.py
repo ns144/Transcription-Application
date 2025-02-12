@@ -180,3 +180,4 @@ def transcribe(task):
 update_json("PROCESSING", 0, 0, "test")
 start_hearbeat_thread(secret)
 refresh_tasks()
+stop_heartbeat_thread()
