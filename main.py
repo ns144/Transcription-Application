@@ -100,10 +100,10 @@ def transcribe(task):
         # Only create thread if it does not already exist
         if stop_event.is_set():
             stop_event.clear()
-            print("Heartbeat Threat restarted")
+            logger.info(processID + " - Heartbeat Threat restarted")
         else:
             start_hearbeat_thread(secret)
-            print("Heartbeat Threat started")
+            logger.info(processID + " - Heartbeat Threat started")
         logger.info(processID + " - Transcription of:"+filename)
         # Download file from S3
         get_file(filename, secret)
