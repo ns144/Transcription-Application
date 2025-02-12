@@ -22,7 +22,7 @@ class TestTranscription(unittest.TestCase):
 
         # Check if speaker diarization returns a list of speakers
         speaker_segments = speaker_diarization(
-            test_file, secret)
+            test_file, secret, 0)
         self.assertIsInstance(speaker_segments, list,
                               "Diarization did not return a list")
 
@@ -34,7 +34,7 @@ class TestTranscription(unittest.TestCase):
 
         # Check if transcription with whisperV3 runs successfully and returns a list of transcribed segments
         transcribed_segments = transcribe_segments_whisperV3(
-            test_file, speaker_segments)
+            test_file, speaker_segments, 0)
         self.assertIsInstance(transcribed_segments, list,
                               "Transcription output is not a list")
         self.assertIsInstance(transcribed_segments[0], transcribed_segment,
