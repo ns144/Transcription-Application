@@ -11,10 +11,11 @@ import os
 
 class JSONProgressHook(ProgressHook):
 
-    def __init__(self, json_file="progress.json", interval=3, transient=False):
+    def __init__(self, transcript_id, json_file="progress.json", interval=3, transient=False):
         super().__init__(transient=transient)
         self.json_file = json_file
         self.interval = interval
+        self.transcript_id = transcript_id
         self.last_update = time.time()
         self.progress_data = {}  # Store step-wise progress
 
@@ -38,12 +39,14 @@ class JSONProgressHook(ProgressHook):
         current_time = time.time()
         if current_time - self.last_update >= self.interval:
             self.last_update = current_time
-            update_json("SPEAKER_DIARIZATION", percentage)
+            update_json("SPEAKER_DIARIZATION", prog_speaker=percentage,
+                        transcript_id=self.transcript_id)
         if percentage == 100:
-            update_json("SPEAKER_DIARIZATION", percentage)
+            update_json("SPEAKER_DIARIZATION", prog_speaker=percentage,
+                        transcript_id=self.transcript_id)
 
 
-def speaker_diarization(sourcefile, secret):
+def speaker_diarization(sourcefile, secret, transcript_id):
     sys.path.insert(0, '../utils')
     # usage of pyannote pretrained model for speaker diarization
     pipeline = Pipeline.from_pretrained(
@@ -61,7 +64,7 @@ def speaker_diarization(sourcefile, secret):
     audio_in_memory = {"waveform": waveform, "sample_rate": sample_rate}
     # sourcefile = 'audio.wav'
     # apply the pipeline to an audio file
-    with JSONProgressHook() as hook:
+    with JSONProgressHook(transcript_id=transcript_id) as hook:
         diarization = pipeline(audio_in_memory, hook=hook)
 
     speaker_segments = []

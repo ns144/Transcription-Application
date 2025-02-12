@@ -55,7 +55,7 @@ def condense_chunks(segments: list, sentences: int = 1, inprecise: bool = True):
     return summarized_segments
 
 
-def transcribe_segments_whisperV3(filename, speaker_segments):
+def transcribe_segments_whisperV3(filename, speaker_segments, transcript_id):
     import torch
     from pydub import AudioSegment
     import numpy as np
@@ -113,10 +113,10 @@ def transcribe_segments_whisperV3(filename, speaker_segments):
         if current_time - last_update >= interval:
             last_update = current_time
             update_json("TRANSCRIPTION", prog_speaker=100,
-                        prog_transcription=percentage)
+                        prog_transcription=percentage, transcript_id=transcript_id)
         if percentage == 100:
             update_json("TRANSCRIPTION", prog_speaker=100,
-                        prog_transcription=percentage)
+                        prog_transcription=percentage, transcript_id=transcript_id)
 
         with tqdm.tqdm(total=total) as progress:
             # Slice Audio with pydup

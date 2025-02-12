@@ -49,18 +49,18 @@ secret = get_secret()
 stop_event = threading.Event()
 
 
-def call_hearbeat(processID, secret):
+def call_hearbeat(secret):
     while not stop_event.is_set():
-        heartbeat(processID, secret)
+        heartbeat(secret)
         time.sleep(5)
 
 
-def start_hearbeat_thread(processID, secret):
+def start_hearbeat_thread(secret):
     # Clear the stop event before start
     stop_event.clear()
     # Start the progress reading thread
-    hearbeat_thread = threading.Thread(target=call_hearbeat, args=(
-                                       processID, secret), daemon=True)
+    hearbeat_thread = threading.Thread(
+        target=call_hearbeat, args=(secret,), daemon=True)
     hearbeat_thread.start()
     return hearbeat_thread
 
@@ -89,13 +89,21 @@ def transcribe(task):
     print("Torch version:" + str(torch.__version__))
 
     file = task
+    transcript_id = str(file["id"])
     filename = str(file["fileNameWithExt"])
     filepath = Path(filename)
     processID = str(file["userId"])+"."+str(file["id"])
     try:
         update_status(file["id"], "PROCESSING", secret)
-        update_json("PROCESSING", 0, 0)
-        start_hearbeat_thread(file["id"], secret)
+        update_json("PROCESSING", 0, 0, transcript_id)
+
+        # Only create thread if it does not already exist
+        if stop_event.is_set():
+            stop_event.clear()
+            print("Heartbeat Threat restarted")
+        else:
+            start_hearbeat_thread(secret)
+            print("Heartbeat Threat started")
         logger.info(processID + " - Transcription of:"+filename)
         # Download file from S3
         get_file(filename, secret)
@@ -107,7 +115,8 @@ def transcribe(task):
         # Run speaker diarization
         try:
             logger.info(processID + " - Speaker Diarization")
-            speaker_segments = speaker_diarization(normed_audio, secret)
+            speaker_segments = speaker_diarization(
+                normed_audio, secret, transcript_id)
         except Exception as error:
             logger.error("Speaker Diarization failed:" + error)
         # Speaker parts are combined where multiple segments of a speaker are not interrupted by another speaker
@@ -119,7 +128,7 @@ def transcribe(task):
         # Transcription with Whisper V3
         start = time.time()
         transcribed_segments = transcribe_segments_whisperV3(
-            normed_audio, speaker_segments)
+            normed_audio, speaker_segments, transcript_id)
         end = time.time()
         elapsed = end-start
         logger.info(
@@ -158,10 +167,12 @@ def transcribe(task):
         os.remove(txt_path)
         os.remove(docx_path)
         stop_heartbeat_thread()
+        time.sleep(0.5)
         update_status(file["id"], "SUCCESS", secret, text[0:500])
         logger.info(processID + " - Transcription Done")
     except Exception as error:
         logger.error("Transcription failed:" + str(error))
+        print("Transcription failed:" + str(error))
         update_status(file["id"], "FAILED", secret)
 
 
