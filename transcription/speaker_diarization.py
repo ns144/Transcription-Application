@@ -18,6 +18,12 @@ class JSONProgressHook:
         self.last_update = time.time()
         self.progress_data = {}  # Store step-wise progress
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        pass
+
     def __call__(self, step_name: str, step_artifact: Any, file: Optional[Mapping] = None, total: Optional[int] = None, completed: Optional[int] = None):
         sys.path.insert(0, os.path.abspath(
             os.path.join(os.path.dirname(__file__), '..')))
