@@ -171,8 +171,7 @@ def transcribe(task):
         update_status(file["id"], "SUCCESS", secret, text[0:500])
         logger.info(processID + " - Transcription Done")
     except Exception as error:
-        logger.error("Transcription failed:" + str(error))
-        print("Transcription failed:" + str(error))
+        logger.exception("Transcription failed:" + str(error))
         update_status(file["id"], "FAILED", secret)
 
 
