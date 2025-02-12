@@ -56,6 +56,8 @@ def call_hearbeat(processID, secret):
 
 
 def start_hearbeat_thread(processID, secret):
+    # Clear the stop event before start
+    stop_event.clear()
     # Start the progress reading thread
     hearbeat_thread = threading.Thread(target=call_hearbeat, args=(
                                        processID, secret), daemon=True)

@@ -24,6 +24,16 @@ class TestHeartbeatThread(unittest.TestCase):
         # Check if thread is terminated
         self.assertFalse(thread.is_alive())
 
+        # Check if threat can be restarted
+        thread = start_hearbeat_thread("cm6z5dprl0001l203zdelpo6a", secret)
+        # Check if thread is alive / started correctly
+        self.assertTrue(thread.is_alive())
+        time.sleep(30)
+        stop_heartbeat_thread()
+        thread.join()
+        # Check if thread is terminated
+        self.assertFalse(thread.is_alive())
+
 
 if __name__ == '__main__':
     unittest.main()
