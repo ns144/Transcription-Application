@@ -10,7 +10,7 @@ import os
 from typing import Any, Mapping, Optional
 
 
-class JSONProgressHook(ProgressHook):
+class JSONProgressHook:
 
     def __init__(self, json_file="progress.json", interval=3, transient=False):
         super().__init__(transient=transient)
