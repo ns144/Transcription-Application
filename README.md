@@ -4,13 +4,8 @@ The core functionality of [Ton-Texter](https://ton-texter.de) is to transcribe a
 
 This repository represents the Python application that we execute on an Amazon EC2 Instance to run the transcription. Theoretically this application can also be run locally on a CUDA capable device.
 
-## Participants
+![SystemEngineering_Transcription_Application](https://github.com/user-attachments/assets/dbeaf3aa-c0d1-48bc-968e-a2824803e4f8)
 
-| Name            | Abbreviation |
-| --------------- | ------------ |
-| Hannes Koksch   | hk058        |
-| Nikolas Schaber | ns144        |
-| Torben Ziegler  | tz023        |
 
 ## How to run the application locally
 
@@ -49,7 +44,8 @@ As you might have notice already this does require you to setup an `env.json` fi
   "SECRET_KEY": "",
   "ACCESS_KEY": "",
   "HUG_TOKEN": "",
-  "STOP_URL": ""
+  "STOP_URL": "",
+  "AMI_URL": "".
 }
 ```
 
@@ -70,6 +66,10 @@ As you might have notice already this does require you to setup an `env.json` fi
 `ACCESS_KEY`: Access key of the S3 bucket
 
 `HUG_TOKEN`: Huggingface Token to get the Pyannote model for speaker diarization
+
+`STOP_URL`: The endpoint of the Lambda to reduce the scale of the Auto Scaling group
+
+`AMI_URL`: The endpoint of the Lambda to create an AMI / Launch Template based on the EC2 machine
 
 After you have setup this file you should be ready to run the application. Remember to activate the Python virtual environment and execute the `main.py` file:
 
@@ -95,7 +95,11 @@ If you just want to test our already deployed application, proceed as follows:
 
 6. Download your transcriptions in DOCX, SRT, and TXT formats.
 
-## Related repositories
+## Related Repositories
 
-- [Cloud-Transcription-Service](https://github.com/ns144/Cloud-Transcription-Service)
-- [Ton-Texter](https://github.com/hanneskoksch/ton-texter)
+| Service                                                      | Description                                                  | Scope                 |
+| ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------- |
+| [Cloud-Transcription-Service](https://github.com/ns144/Cloud-Transcription-Service) | AWS cloud infrastructure via Terraform and Lambdas.          | Transcription Service |
+| [Transcription-Application](https://github.com/ns144/Transcription-Application) | The python application that does the transcription and the speaker diarization. | Transcription Service |
+| [Cloud-Transcription-Machine](https://github.com/ns144/Cloud-Transcription-Machine) | The EC2 machine setup.                                       | Transcription Service |
+| [Ton-Texter-JMeter-Tests](https://github.com/hanneskoksch/Ton-Texter-JMeter-Tests) | JMeter load and quick tests of the Ton-Texter application.   | End-to-end            |
