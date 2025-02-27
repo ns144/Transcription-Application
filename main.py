@@ -94,6 +94,7 @@ def transcribe(task):
     filepath = Path(filename)
     processID = str(file["userId"])+"."+str(file["id"])
     try:
+        raise Exception('Quick test of a failed transcription!')
         update_status(file["id"], "PROCESSING", secret)
         update_json("PROCESSING", 0, 0, transcript_id)
 
