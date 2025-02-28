@@ -97,6 +97,7 @@ If you just want to test our already deployed application, proceed as follows:
 
 | Service                                                      | Description                                                  | Scope                 |
 | ------------------------------------------------------------ | ------------------------------------------------------------ | --------------------- |
+| [Ton-Texter](https://github.com/ns144/Cloud-Transcription-Service) | The Next.js application.          | Next.js |
 | [Cloud-Transcription-Service](https://github.com/ns144/Cloud-Transcription-Service) | AWS cloud infrastructure via Terraform and Lambdas.          | Transcription Service |
 | [Transcription-Application](https://github.com/ns144/Transcription-Application) | The python application that does the transcription and the speaker diarization. | Transcription Service |
 | [Cloud-Transcription-Machine](https://github.com/ns144/Cloud-Transcription-Machine) | The EC2 machine setup.                                       | Transcription Service |
