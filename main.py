@@ -33,6 +33,7 @@ fh.setFormatter(formatter)
 
 logger.addHandler(fh)
 
+# Get instance id (for shutdown call to stop lambda)
 try:
     instanceid = urllib.request.urlopen(
         'http://169.254.169.254/latest/meta-data/instance-id').read().decode()
@@ -68,6 +69,8 @@ def start_hearbeat_thread(secret):
 def stop_heartbeat_thread():
     stop_event.set()
 
+# Fetch new tasks - if no further task - initiate shutdown with Stop Lambda Call
+
 
 def refresh_tasks():
     Task = True
@@ -94,16 +97,10 @@ def transcribe(task):
     filepath = Path(filename)
     processID = str(file["userId"])+"."+str(file["id"])
     try:
+        # Set status of transcript to PROCESSING / initialize JSON
         update_status(file["id"], "PROCESSING", secret)
         update_json("PROCESSING", 0, 0, transcript_id)
 
-        # Only create thread if it does not already exist
-        # if stop_event.is_set():
-        #    stop_event.clear()
-        #    logger.info(processID + " - Heartbeat Threat restarted")
-        # else:
-        #    start_hearbeat_thread(secret)
-        #    logger.info(processID + " - Heartbeat Threat started")
         logger.info(processID + " - Transcription of:"+filename)
         # Download file from S3
         get_file(filename, secret)
@@ -147,7 +144,8 @@ def transcribe(task):
                 srt_segments.append(s)
         segments_as_dict = dict()
         segments_as_dict["segments"] = srt_segments
-        # File paths for srt, txt and docx
+
+        # File paths for srt, txt and docx - Write files
         srt_path = filepath.with_suffix('.srt')
         txt_path = filepath.with_suffix('.txt')
         docx_path = filepath.with_suffix('.docx')
@@ -169,7 +167,7 @@ def transcribe(task):
         os.remove(docx_path)
         update_json("SUCCESS", prog_speaker=100,
                     prog_transcription=100, transcript_id=transcript_id)
-        # stop_heartbeat_thread()
+
         update_status(file["id"], "SUCCESS", secret, text[0:500], 100, 100)
         logger.info(processID + " - Transcription Done")
     except Exception as error:
@@ -177,7 +175,9 @@ def transcribe(task):
         update_status(file["id"], "FAILED", secret)
 
 
+# Intitialize JSON for Heartbeat Thread
 update_json("PROCESSING", 0, 0, 0)
+# Start Heartbeat Thread
 start_hearbeat_thread(secret)
 refresh_tasks()
 stop_heartbeat_thread()
